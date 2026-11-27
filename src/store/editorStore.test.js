@@ -155,3 +155,24 @@ test('Drawing targets the active layer and hidden-layer selection is cleared', (
   store.toggleLayerVisible(baseLayer);
   assert.equal(store.doc.peek().layers.find((layer) => layer.id === baseLayer).visible, true);
 });
+
+test('Linear and radial fill gradients are stored as validated document data', () => {
+  store.newDocument();
+  const shape = createRect(10, 10, 100, 80);
+  store.addShape(shape);
+  const fillGradient = {
+    type: 'linear',
+    angle: 45,
+    stops: [
+      { offset: 0, color: '#ff0000', opacity: 1 },
+      { offset: 1, color: '#0000ff', opacity: 0.8 },
+    ],
+  };
+  store.patchSelectedStyle({ fillGradient });
+  assert.deepEqual(store.getSelectedShapes()[0].style.fillGradient, fillGradient);
+  assert.doesNotThrow(() => validateDocument(store.doc.peek()));
+
+  const invalid = structuredClone(store.doc.peek());
+  invalid.layers[0].shapes[0].style.fillGradient.stops[0].offset = 2;
+  assert.throws(() => validateDocument(invalid), /Invalid gradient appearance/);
+});
