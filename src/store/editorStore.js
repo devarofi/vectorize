@@ -196,6 +196,72 @@ export function distributeSelected(axis = 'x') {
 }
 
 
+
+function shapePointsForTransform(shape) {
+  const g = shape.geometry;
+  if (shape.kind === 'rect') {
+    return [
+      { x: g.x, y: g.y }, { x: g.x + g.width, y: g.y },
+      { x: g.x + g.width, y: g.y + g.height }, { x: g.x, y: g.y + g.height },
+    ];
+  }
+  if (shape.kind === 'ellipse') {
+    return Array.from({ length: 64 }, (_, index) => {
+      const angle = index * Math.PI * 2 / 64;
+      return { x: g.cx + Math.cos(angle) * g.rx, y: g.cy + Math.sin(angle) * g.ry };
+    });
+  }
+  return g.points.map((point) => ({ ...point }));
+}
+function transformShapePoints(shape, transformPoint) {
+  const closed = shape.kind === 'rect' || shape.kind === 'ellipse' || !!shape.geometry.closed;
+  shape.geometry = { points: shapePointsForTransform(shape).map(transformPoint), closed };
+  shape.kind = 'path';
+}
+
+/** Set an absolute rotation angle for selected objects around selection center. */
+export function setSelectedRotation(degrees) {
+  const target = Number(degrees);
+  const shapes = getSelectedShapes();
+  if (!shapes.length || !Number.isFinite(target)) return;
+  const bounds = boundsOf(shapes);
+  const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+  const ids = selection.peek();
+  transact('Rotate selection', (draft) => {
+    for (const id of ids) {
+      const shape = findShape(draft, id)?.shape;
+      if (!shape) continue;
+      const delta = (target - (shape.rotation || 0)) * Math.PI / 180;
+      if (Math.abs(delta) < 1e-9) continue;
+      const cos = Math.cos(delta), sin = Math.sin(delta);
+      transformShapePoints(shape, (point) => {
+        const x = point.x - center.x, y = point.y - center.y;
+        return { x: center.x + x * cos - y * sin, y: center.y + x * sin + y * cos };
+      });
+      shape.rotation = target;
+    }
+  });
+}
+
+/** Reflect selected objects around the selection center on one axis. */
+export function reflectSelected(axis = 'horizontal') {
+  const shapes = getSelectedShapes();
+  if (!shapes.length) return;
+  const bounds = boundsOf(shapes);
+  const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+  const ids = selection.peek();
+  transact(axis === 'horizontal' ? 'Reflect horizontally' : 'Reflect vertically', (draft) => {
+    for (const id of ids) {
+      const shape = findShape(draft, id)?.shape;
+      if (!shape) continue;
+      transformShapePoints(shape, (point) => ({
+        x: axis === 'horizontal' ? center.x * 2 - point.x : point.x,
+        y: axis === 'vertical' ? center.y * 2 - point.y : point.y,
+      }));
+    }
+  });
+}
+
 /** Set a uniform corner radius on selected rectangle primitives. */
 export function setSelectedCornerRadius(radius) {
   const ids = selection.peek();
