@@ -48,9 +48,12 @@ export class SvgRenderer {
     this.overlay = {
       outline: el('rect', { class: 'sel-outline', fill: 'none', stroke: '#7dd3fc', 'stroke-width': 1, visibility: 'hidden' }),
       handles: {},
-      ghost: el('rect', { class: 'ghost', fill: 'rgba(79,142,247,.15)', stroke: '#4f8ef7', 'stroke-dasharray': '4 3', visibility: 'hidden' }),
+      ghost: el('rect', { class: 'ghost ghost-rect', visibility: 'hidden' }),
+      ghostEllipse: el('ellipse', { class: 'ghost ghost-ellipse', visibility: 'hidden' }),
       marquee: el('rect', { class: 'marquee', fill: 'rgba(125,211,252,.12)', stroke: '#7dd3fc', 'stroke-width': 1, 'stroke-dasharray': '3 3', visibility: 'hidden' }),
-      penPath: el('polyline', { class: 'pen-preview', fill: 'none', stroke: '#4f8ef7', 'stroke-width': 1.5, 'stroke-dasharray': '5 4', visibility: 'hidden' }),
+      penPath: el('polyline', { class: 'pen-preview', visibility: 'hidden' }),
+      penAnchors: el('g', { class: 'pen-anchors' }),
+      penCursor: el('circle', { class: 'pen-cursor', r: 4, visibility: 'hidden' }),
     };
     // Handles live in their own group so they can be hidden as a unit.
     this.handleGroup = el('g', { class: 'handles' });
@@ -64,7 +67,7 @@ export class SvgRenderer {
       this.overlay.handles[name] = h;
       this.handleGroup.append(h);
     }
-    this.overlayRoot.append(this.overlay.outline, this.handleGroup, this.overlay.ghost, this.overlay.marquee, this.overlay.penPath);
+    this.overlayRoot.append(this.overlay.outline, this.handleGroup, this.overlay.ghost, this.overlay.ghostEllipse, this.overlay.marquee, this.overlay.penPath, this.overlay.penAnchors, this.overlay.penCursor);
   }
 
   /* ---------------------------------------------------------------- */
@@ -247,20 +250,33 @@ export class SvgRenderer {
   /* Imperative overlays driven by tools (no reactive state touched)   */
   /* ---------------------------------------------------------------- */
 
-  /** Show the dashed rectangle while dragging out a new rect/ellipse. */
-  showGhost(worldBox) {
+  /** Show a shape-accurate outline while dragging out a new object. */
+  showGhost(worldBox, kind = 'rect') {
     const vp = this.store.viewport.peek();
     const tl = worldToScreen(vp, { x: worldBox.x, y: worldBox.y });
     const br = worldToScreen(vp, { x: worldBox.x + worldBox.width, y: worldBox.y + worldBox.height });
-    const g = this.overlay.ghost;
-    g.setAttribute('x', fmt(tl.x)); g.setAttribute('y', fmt(tl.y));
-    g.setAttribute('width', fmt(Math.max(br.x - tl.x, 0)));
-    g.setAttribute('height', fmt(Math.max(br.y - tl.y, 0)));
-    g.setAttribute('visibility', 'visible');
+    const width = Math.max(br.x - tl.x, 0);
+    const height = Math.max(br.y - tl.y, 0);
+    const rect = this.overlay.ghost;
+    const ellipse = this.overlay.ghostEllipse;
+    if (kind === 'ellipse') {
+      rect.setAttribute('visibility', 'hidden');
+      ellipse.setAttribute('cx', fmt(tl.x + width / 2));
+      ellipse.setAttribute('cy', fmt(tl.y + height / 2));
+      ellipse.setAttribute('rx', fmt(width / 2));
+      ellipse.setAttribute('ry', fmt(height / 2));
+      ellipse.setAttribute('visibility', 'visible');
+    } else {
+      ellipse.setAttribute('visibility', 'hidden');
+      rect.setAttribute('x', fmt(tl.x)); rect.setAttribute('y', fmt(tl.y));
+      rect.setAttribute('width', fmt(width)); rect.setAttribute('height', fmt(height));
+      rect.setAttribute('visibility', 'visible');
+    }
   }
 
   hideGhost() {
     this.overlay.ghost.setAttribute('visibility', 'hidden');
+    this.overlay.ghostEllipse.setAttribute('visibility', 'hidden');
   }
 
   /** Marquee selection rectangle in world coords. */
@@ -279,19 +295,35 @@ export class SvgRenderer {
     this.overlay.marquee.setAttribute('visibility', 'hidden');
   }
 
-  /** Live polyline while the Pen tool accumulates points. */
+  /** Live path, fixed anchor markers, and cursor marker for the Pen tool. */
   showPenPreview(pointsWorld, cursorWorld) {
     const vp = this.store.viewport.peek();
+    const toScreen = (p) => worldToScreen(vp, p);
     const pts = [...pointsWorld, cursorWorld].map((p) => {
-      const s = worldToScreen(vp, p);
+      const s = toScreen(p);
       return `${fmt(s.x)},${fmt(s.y)}`;
     }).join(' ');
     this.overlay.penPath.setAttribute('points', pts);
-    this.overlay.penPath.setAttribute('visibility', 'visible');
+    this.overlay.penPath.setAttribute('visibility', pointsWorld.length ? 'visible' : 'hidden');
+
+    // Rebuild the small anchor markers; these are only present during a pen gesture.
+    this.overlay.penAnchors.replaceChildren();
+    for (const point of pointsWorld) {
+      const p = toScreen(point);
+      this.overlay.penAnchors.append(el('circle', {
+        class: 'pen-anchor', cx: fmt(p.x), cy: fmt(p.y), r: 3.5,
+      }));
+    }
+    const cursor = toScreen(cursorWorld);
+    this.overlay.penCursor.setAttribute('cx', fmt(cursor.x));
+    this.overlay.penCursor.setAttribute('cy', fmt(cursor.y));
+    this.overlay.penCursor.setAttribute('visibility', pointsWorld.length ? 'visible' : 'hidden');
   }
 
   hidePenPreview() {
     this.overlay.penPath.setAttribute('visibility', 'hidden');
+    this.overlay.penAnchors.replaceChildren();
+    this.overlay.penCursor.setAttribute('visibility', 'hidden');
   }
 
   /** Screen point -> world point convenience for tools. */
