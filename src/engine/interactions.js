@@ -115,6 +115,25 @@ export class InteractionController {
     const point = this.#world(e);
     const tool = store.activeTool.peek();
 
+    if (tool === 'magicWand') {
+      const hit = hitTest(allShapes(store.doc.peek()), point, 8, store.viewport.peek().scale);
+      if (hit) {
+        const sample = store.doc.peek().layers.flatMap((layer) => layer.shapes).find((shape) => shape.id === hit.id);
+        const matches = allShapes(store.doc.peek()).filter((shape) =>
+          shape.style.fill === sample.style.fill &&
+          shape.style.stroke === sample.style.stroke &&
+          shape.style.strokeWidth === sample.style.strokeWidth &&
+          shape.style.opacity === sample.style.opacity
+        ).map((shape) => shape.id);
+        store.select(matches, { additive: e.shiftKey });
+        this.renderer.render();
+      }
+      return;
+    }
+    if (tool === 'lasso') {
+      this.gesture = { mode: 'lasso', points: [point], additive: e.shiftKey };
+      return;
+    }
     if (tool === 'zoom') {
       store.zoom(e.shiftKey ? 0.8 : 1.25, this.#toCanvasPoint(e));
       this.renderer.render();
@@ -269,6 +288,15 @@ export class InteractionController {
         this.renderer.render();
         break;
       }
+      case 'lasso': {
+        const p = this.#world(e);
+        const last = g.points[g.points.length - 1];
+        if (Math.hypot(p.x - last.x, p.y - last.y) >= 3 / store.viewport.peek().scale) {
+          g.points.push(p);
+          this.renderer.showPenPreview(g.points, p);
+        }
+        break;
+      }
       case 'freehand': {
         const p = this.#snap(this.#world(e));
         const last = g.points[g.points.length - 1];
@@ -371,6 +399,18 @@ export class InteractionController {
         break;
       }
 
+      case 'lasso': {
+        this.renderer.hidePenPreview();
+        if (g.points.length >= 3) {
+          const picked = allShapes(store.doc.peek()).filter((shape) => {
+            const box = shapeBounds(shape);
+            return pointInPolygon({ x: box.x + box.width / 2, y: box.y + box.height / 2 }, g.points);
+          }).map((shape) => shape.id);
+          store.select(picked, { additive: g.additive });
+        }
+        this.renderer.render();
+        break;
+      }
       case 'freehand': {
         this.renderer.hidePenPreview();
         if (g.points.length >= 2) {
@@ -539,6 +579,18 @@ export class InteractionController {
 /* -------------------------------------------------------------------- */
 /* Local geometry helpers (kept here so tools stay readable)             */
 /* -------------------------------------------------------------------- */
+
+
+function pointInPolygon(point, polygon) {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const a = polygon[i], b = polygon[j];
+    const crosses = ((a.y > point.y) !== (b.y > point.y)) &&
+      (point.x < ((b.x - a.x) * (point.y - a.y)) / ((b.y - a.y) || Number.EPSILON) + a.x);
+    if (crosses) inside = !inside;
+  }
+  return inside;
+}
 
 function findShapeById(doc, id) {
   for (const layer of doc.layers) {
