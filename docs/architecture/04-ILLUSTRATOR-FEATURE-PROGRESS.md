@@ -338,8 +338,10 @@ The right panel combines functional selection-aware Transform and Appearance con
 - [ ] Text on path options and type orientation
 
 ### Contextual geometry properties
-- [ ] Rectangle: X/Y/W/H, corner radii and independent corners
-- [ ] Rounded rectangle: per-corner radius
+- [~] Rectangle: X/Y/W/H and uniform corner radius
+- [ ] Independent corner radii
+- [~] Rounded rectangle: uniform corner radius
+- [ ] Per-corner radius
 - [ ] Ellipse: center, radius X/Y, start/end angle and closure
 - [ ] Polygon: sides, radius and rotation
 - [ ] Star: points, inner radius and outer radius
