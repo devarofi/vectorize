@@ -186,6 +186,8 @@ function renderEditor() {
                 <label class="property-field"><span>W</span><input id="prop-width" data-transform="width" type="number" min="0" step="any" value="—" disabled /></label>
                 <label class="property-field"><span>H</span><input id="prop-height" data-transform="height" type="number" min="0" step="any" value="—" disabled /></label>
               </div>
+              <div class="property-row"><label for="prop-rotation">Rotation</label><input id="prop-rotation" class="compact-number" type="number" step="any" value="0" /></div>
+              <div class="icon-action-grid transform-actions"><button type="button" data-reflect="horizontal" title="Flip horizontal">⇋</button><button type="button" data-reflect="vertical" title="Flip vertical">⇵</button></div>
               <div class="property-inline-row"><button type="button" class="mini-icon-button" title="Constrain proportions (not implemented)" disabled>↔</button><span class="muted">Constrain proportions</span><button type="button" class="mini-icon-button" title="More transform options (not implemented)" disabled>⌗</button></div>
               <div class="property-row" id="corner-radius-row" hidden><label for="prop-corner-radius">Corner radius</label><input id="prop-corner-radius" class="compact-number" type="number" min="0" step="any" value="0" /></div>
             </section>
@@ -309,7 +311,7 @@ function renderEditor() {
   const menuItems = {
     File: [['New', 'new'], ['Open JSON…', 'open'], ['Import SVG…', 'open-svg'], ['Save JSON', 'save'], ['Export SVG', 'svg'], ['Export PNG (1×)', 'png']],
     Edit: [['Undo', 'undo'], ['Redo', 'redo'], ['Select all', 'select-all'], ['Deselect', 'deselect'], ['Duplicate', 'duplicate'], ['Delete', 'delete']],
-    Object: [['Bring to front', 'front'], ['Send to back', 'back'], ['Align left', 'align-left'], ['Center horizontally', 'align-center-x'], ['Align right', 'align-right'], ['Align top', 'align-top'], ['Center vertically', 'align-center-y'], ['Align bottom', 'align-bottom'], ['Distribute horizontally', 'distribute-x'], ['Distribute vertically', 'distribute-y']],
+    Object: [['Bring to front', 'front'], ['Send to back', 'back'], ['Rotate 90°', 'rotate-90'], ['Flip horizontal', 'flip-horizontal'], ['Flip vertical', 'flip-vertical'], ['Align left', 'align-left'], ['Center horizontally', 'align-center-x'], ['Align right', 'align-right'], ['Align top', 'align-top'], ['Center vertically', 'align-center-y'], ['Align bottom', 'align-bottom'], ['Distribute horizontally', 'distribute-x'], ['Distribute vertically', 'distribute-y']],
     Type: [['Create text', 'unsupported-type']],
     Select: [['Select all', 'select-all'], ['Deselect', 'deselect']],
     Effect: [['Effects are not available for current geometry model', 'noop']],
@@ -338,6 +340,9 @@ function renderEditor() {
       case 'delete': store.deleteSelected(); break;
       case 'front': store.arrangeSelected('front'); break;
       case 'back': store.arrangeSelected('back'); break;
+      case 'rotate-90': store.rotateSelectedBy(90); break;
+      case 'flip-horizontal': store.reflectSelected('horizontal'); break;
+      case 'flip-vertical': store.reflectSelected('vertical'); break;
       case 'align-left': store.alignSelected('left'); break;
       case 'align-center-x': store.alignSelected('center-x'); break;
       case 'align-right': store.alignSelected('right'); break;
@@ -466,6 +471,17 @@ function renderEditor() {
     store.patchSelectedStyle({ opacity: Math.max(0, Math.min(100, value)) / 100 });
     scheduleRender();
   });
+  document.querySelector('#prop-rotation').addEventListener('change', (event) => {
+    if (event.target.value.trim() === '') return;
+    const value = Number(event.target.value);
+    if (!Number.isFinite(value)) return;
+    store.setSelectedRotation(value);
+    scheduleRender();
+  });
+  document.querySelectorAll('[data-reflect]').forEach((button) => button.addEventListener('click', () => {
+    store.reflectSelected(button.dataset.reflect);
+    scheduleRender();
+  }));
   document.querySelector('#prop-corner-radius').addEventListener('change', (event) => {
     if (event.target.value.trim() === '') return;
     const value = Number(event.target.value);
@@ -644,6 +660,9 @@ function updatePanels() {
   setField('#prop-y', bounds ? numberText(bounds.y) : '');
   setField('#prop-width', bounds ? numberText(bounds.width) : '');
   setField('#prop-height', bounds ? numberText(bounds.height) : '');
+  const rotations = shapes.map((shape) => shape.rotation || 0);
+  const rotationValue = rotations.length && rotations.every((value) => value === rotations[0]) ? rotations[0] : '';
+  setField('#prop-rotation', rotationValue);
 
   const uniform = (key) => {
     if (!shapes.length) return null;
