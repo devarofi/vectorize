@@ -47,7 +47,7 @@ function renderEditor() {
         <aside class="tool-rail" aria-label="Illustration tools">
           <div class="tool-group" aria-label="Selection tools">
             ${toolButton('↖', 'Selection Tool', 'V', 'select')}
-            ${toolButton('⌖', 'Direct Selection Tool', 'A')}
+            ${toolButton('⌖', 'Direct Selection Tool')}
             ${toolButton('▱', 'Group Selection Tool')}
             ${toolButton('✳', 'Magic Wand Tool')}
             ${toolButton('⌁', 'Lasso Tool')}
@@ -56,7 +56,7 @@ function renderEditor() {
           <div class="tool-group" aria-label="Drawing and path tools">
             ${toolButton('✒', 'Pen Tool', 'P', 'pen')}
             ${toolButton('⌁', 'Curvature Tool')}
-            ${toolButton('✎', 'Pencil Tool', 'N')}
+            ${toolButton('✎', 'Pencil Tool')}
             ${toolButton('〰', 'Smooth Tool')}
             ${toolButton('⌫', 'Path Eraser Tool')}
             ${toolButton('⊣', 'Join Tool')}
@@ -71,12 +71,12 @@ function renderEditor() {
           </div>
           <div class="tool-divider"></div>
           <div class="tool-group" aria-label="Shape tools">
-            ${toolButton('▭', 'Rectangle Tool', 'M', 'rect')}
+            ${toolButton('▭', 'Rectangle Tool', 'R', 'rect')}
             ${toolButton('▢', 'Rounded Rectangle Tool')}
-            ${toolButton('◯', 'Ellipse Tool', 'L', 'ellipse')}
+            ${toolButton('◯', 'Ellipse Tool', 'O', 'ellipse')}
             ${toolButton('⬡', 'Polygon Tool')}
             ${toolButton('☆', 'Star Tool')}
-            ${toolButton('／', 'Line Segment Tool', '\\', 'line')}
+            ${toolButton('／', 'Line Segment Tool', 'L', 'line')}
             ${toolButton('⌒', 'Arc Tool')}
             ${toolButton('◎', 'Spiral Tool')}
             ${toolButton('▦', 'Rectangular Grid Tool')}
@@ -113,8 +113,8 @@ function renderEditor() {
           </div>
           <div class="tool-divider"></div>
           <div class="tool-group" aria-label="Navigation tools">
-            ${toolButton('✋', 'Hand Tool', 'H')}
-            ${toolButton('⌕', 'Zoom Tool', 'Z')}
+            ${toolButton('✋', 'Hand Tool')}
+            ${toolButton('⌕', 'Zoom Tool')}
           </div>
           <div class="tool-footer">
             <button type="button" class="color-swatch-button" title="Fill and stroke swatches"><span class="swatch-fill"></span><span class="swatch-stroke"></span></button>
