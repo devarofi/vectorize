@@ -52,8 +52,8 @@ function renderEditor() {
             ${toolButton('↖', 'Selection Tool', 'V', 'select')}
             ${toolButton('⌖', 'Direct Selection Tool')}
             ${toolButton('▱', 'Group Selection Tool')}
-            ${toolButton('✳', 'Magic Wand Tool')}
-            ${toolButton('⌁', 'Lasso Tool')}
+            ${toolButton('✳', 'Magic Wand Tool', '', 'magicWand')}
+            ${toolButton('⌁', 'Lasso Tool', '', 'lasso')}
           </div>
           <div class="tool-divider"></div>
           <div class="tool-group" aria-label="Drawing and path tools">
