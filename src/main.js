@@ -84,10 +84,10 @@ function renderEditor() {
             ${toolButton('⬡', 'Polygon Tool', '', 'polygon')}
             ${toolButton('☆', 'Star Tool', '', 'star')}
             ${toolButton('／', 'Line Segment Tool', 'L', 'line')}
-            ${toolButton('⌒', 'Arc Tool')}
-            ${toolButton('◎', 'Spiral Tool')}
-            ${toolButton('▦', 'Rectangular Grid Tool')}
-            ${toolButton('▧', 'Polar Grid Tool')}
+            ${toolButton('⌒', 'Arc Tool', '', 'arc')}
+            ${toolButton('◎', 'Spiral Tool', '', 'spiral')}
+            ${toolButton('▦', 'Rectangular Grid Tool', '', 'rectGrid')}
+            ${toolButton('▧', 'Polar Grid Tool', '', 'polarGrid')}
             ${toolButton('☼', 'Flare Tool')}
           </div>
           <div class="tool-divider"></div>
