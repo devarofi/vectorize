@@ -145,7 +145,7 @@ The visible toolbar is grouped into logical sections. Implemented tools are wire
 - [x] Opacity and blend-mode visuals
 - [x] Color spectrum and gradient preview placeholders
 - [x] Character and Paragraph inspector placeholder (shown for text selections)
-- [ ] Solid, gradient and pattern fills
+- [~] Solid, linear and radial gradient fills (two-stop basic editor; advanced stops/freeform/pattern pending)
 - [ ] Color models, swatch groups and color picker workflows
 - [ ] Multiple fills and strokes / Appearance stack
 - [ ] Opacity masks and transparency controls
@@ -230,7 +230,7 @@ The right panel combines functional selection-aware Transform and Appearance con
 - [x] Color spectrum preview
 - [x] Gradient preview
 - [ ] Fill color picker with HEX, RGB, HSL and alpha
-- [ ] Fill type: solid, linear gradient, radial gradient, freeform gradient, pattern
+- [~] Fill type: solid, linear and radial gradient; freeform and pattern pending
 - [ ] Stroke color picker and stroke enable/disable
 - [ ] Multiple fills and multiple strokes
 - [ ] Appearance stack: add, remove, reorder and duplicate appearance entries
@@ -299,11 +299,12 @@ The right panel combines functional selection-aware Transform and Appearance con
 - [x] Gradient preview visual
 - [x] Linear type selector visual
 - [x] Angle field visual
-- [ ] Linear and radial gradient editing
+- [~] Linear and radial gradient type and angle editing
 - [ ] Freeform gradient points and lines
-- [ ] Gradient stops, midpoint and stop opacity
-- [ ] Stop color editing and stop positioning
-- [ ] Gradient angle, aspect ratio and origin
+- [~] Default two-stop gradient; interactive stop/midpoint/opacity editing pending
+- [~] First-stop color follows Fill color; independent stop positioning pending
+- [x] Gradient angle editing
+- [ ] Gradient aspect ratio and origin
 - [ ] Reverse gradient and reset gradient
 - [ ] Save gradient as swatch
 - [ ] Gradient annotator on canvas
@@ -530,7 +531,8 @@ This is the per-button inventory for the current left toolbar. A visible button 
 - [ ] Boolean path operations
 - [ ] Groups, compound paths and clipping paths
 - [ ] Stroke model (caps, joins, dash, width profiles)
-- [ ] Gradients, patterns, meshes and swatches
+- [~] Linear/radial gradients
+- [ ] Patterns, meshes and swatches
 - [ ] Text and typography engine
 - [ ] Image placement and image tracing
 - [ ] Symbols and reusable components
@@ -585,7 +587,7 @@ This is the per-button inventory for the current left toolbar. A visible button 
 - The Layers tab supports creating, renaming, activating, hiding/showing and deleting empty layers; the Assets tab inserts reusable primitive presets.
 - The drawing tool set includes rounded rectangle, polygon, star, arc, spiral, rectangular/polar grid, pencil/freehand, constant-width paintbrush, smooth, magic wand, lasso, eyedropper, click-to-delete eraser, hand and zoom.
 - Native save/open uses a versioned JSON envelope with import validation; SVG and PNG export serialize currently supported primitive geometry.
-- The Properties panel supports editable stroke cap/join/dash and blend mode; document width/height are editable when no object is selected.
+- The Properties panel supports editable stroke cap/join/dash, blend mode, solid/linear/radial fills and gradient angle; document width/height are editable when no object is selected.
 - Some advanced items remain intentionally deferred because the current document model does not yet represent them (text objects, symbol instances, graph data, live-paint regions, variable-width strokes, mesh patches, and path Boolean topology).
 - Resize previews apply a live SVG transform to selected objects and update selection handles during pointer movement; pointer-up commits one history entry.
 - Fill, stroke color, opacity, stroke weight and selection bounds are now data-driven inspector controls; each edit is committed as a single undoable operation.
