@@ -589,11 +589,11 @@ This is the per-button inventory for the current left toolbar. A visible button 
 ## 9. Current implementation notes
 
 - Unsupported toolbar entries are disabled and do not pretend to be functional.
-- File/Edit/Object/View menus now expose working document, selection, arrange, align and viewport commands.
+- File/Edit/Object/Select/View/Window menus expose working document, selection, arrange, align, distribute, rotation/reflection, panel and viewport commands; Type/Effect remain disabled.
 - The Layers tab supports creating, renaming, activating, hiding/showing and deleting empty layers; the Assets tab inserts reusable primitive presets.
 - The drawing tool set includes rounded rectangle, polygon, star, arc, spiral, rectangular/polar grid, pencil/freehand, constant-width paintbrush, smooth, magic wand, lasso, eyedropper, click-to-delete eraser, hand and zoom.
-- Native save/open uses a versioned JSON envelope with import validation; SVG and PNG export serialize currently supported primitive geometry.
-- The Properties panel supports editable stroke cap/join/dash, blend mode, solid/linear/radial fills and gradient angle; document width/height are editable when no object is selected.
+- Native save/open uses a versioned JSON envelope with import validation; SVG import accepts safe primitive elements and straight-segment paths, while SVG/PNG export preserve supported geometry and basic gradients.
+- The Properties panel supports editable X/Y/W/H, rotation, reflection, rounded corners, fill/stroke, opacity, stroke weight/cap/join/dash, blend mode, solid/linear/radial fills and gradient angle; document width/height are editable when no object is selected.
 - Some advanced items remain intentionally deferred because the current document model does not yet represent them (text objects, symbol instances, graph data, live-paint regions, variable-width strokes, mesh patches, and path Boolean topology).
 - Resize previews apply a live SVG transform to selected objects and update selection handles during pointer movement; pointer-up commits one history entry.
 - Fill, stroke color, opacity, stroke weight and selection bounds are now data-driven inspector controls; each edit is committed as a single undoable operation.
