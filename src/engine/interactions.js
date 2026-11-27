@@ -233,7 +233,7 @@ export class InteractionController {
         g.current = this.#snap(this.#world(e));
         const box = boxFromCorners(g.start, g.current);
         if (g.kind === 'line') {
-          this.renderer.showGhost({ x: Math.min(g.start.x, g.current.x), y: Math.min(g.start.y, g.current.y), width: Math.abs(g.current.x - g.start.x), height: Math.abs(g.current.y - g.start.y) }, 'rect');
+          this.renderer.showLineGhost(g.start, g.current);
         } else {
           this.renderer.showGhost(box, g.kind);
         }
