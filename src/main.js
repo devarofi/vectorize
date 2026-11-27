@@ -205,8 +205,9 @@ function renderEditor() {
             <section class="panel-section selection-properties" id="stroke-properties">
               <div class="section-heading"><h3>Stroke</h3><button class="panel-more" type="button" title="More stroke options">···</button></div>
               <div class="property-row"><label for="prop-stroke-width">Weight</label><input id="prop-stroke-width" class="compact-number" type="number" min="0" step="any" value="2" /></div>
-              <div class="property-row"><span>Cap</span><div class="segmented-static"><span class="selected">Butt</span><span>Round</span><span>Project</span></div></div>
-              <div class="property-row"><span>Join</span><div class="segmented-static"><span class="selected">Miter</span><span>Round</span><span>Bevel</span></div></div>
+              <div class="property-row"><label for="prop-linecap">Cap</label><select id="prop-linecap" class="compact-select"><option value="butt">Butt</option><option value="round">Round</option><option value="square">Projecting</option></select></div>
+              <div class="property-row"><label for="prop-linejoin">Join</label><select id="prop-linejoin" class="compact-select"><option value="miter">Miter</option><option value="round">Round</option><option value="bevel">Bevel</option></select></div>
+              <div class="property-row"><label for="prop-dash">Dash</label><input id="prop-dash" class="compact-number" type="text" placeholder="e.g. 8 4" /></div>
               <div class="property-row"><span>Profile</span><div class="fake-select">Uniform <span>⌄</span></div></div>
             </section>
 
@@ -245,7 +246,7 @@ function renderEditor() {
             <section class="panel-section selection-properties" id="transparency-properties">
               <div class="section-heading"><h3>Transparency</h3></div>
               <div class="property-row"><span>Opacity</span><input class="compact-number" type="text" value="100%" disabled /></div>
-              <div class="property-row"><span>Blend mode</span><div class="fake-select">Normal <span>⌄</span></div></div>
+              <div class="property-row"><label for="prop-blend">Blend mode</label><select id="prop-blend" class="compact-select"><option value="normal">Normal</option><option value="multiply">Multiply</option><option value="screen">Screen</option><option value="overlay">Overlay</option><option value="darken">Darken</option><option value="lighten">Lighten</option><option value="color-dodge">Color Dodge</option><option value="color-burn">Color Burn</option><option value="difference">Difference</option><option value="exclusion">Exclusion</option></select></div>
               <div class="property-row"><span>Isolate blending</span><span class="muted">Off</span></div>
             </section>
 
@@ -263,8 +264,8 @@ function renderEditor() {
 
             <section class="panel-section document-properties" id="document-properties">
               <div class="section-heading"><h3>Document</h3><span class="muted">Artboard 1</span></div>
-              <div class="property-row"><span>Width</span><input class="compact-number" type="text" value="1280 px" disabled /></div>
-              <div class="property-row"><span>Height</span><input class="compact-number" type="text" value="800 px" disabled /></div>
+              <div class="property-row"><label for="document-width">Width</label><input id="document-width" class="compact-number" type="number" min="1" max="100000" step="1" value="1280" /></div>
+              <div class="property-row"><label for="document-height">Height</label><input id="document-height" class="compact-number" type="number" min="1" max="100000" step="1" value="800" /></div>
               <div class="property-row"><span>Units</span><div class="fake-select">Pixels <span>⌄</span></div></div>
             </section>
 
@@ -380,7 +381,8 @@ function renderEditor() {
     scheduleRender();
   });
   document.querySelectorAll('[data-asset]').forEach((button) => button.addEventListener('click', () => {
-    const x = 80 + Math.random() * 240, y = 80 + Math.random() * 180;
+    const currentDoc = store.doc.peek();
+    const x = currentDoc.width / 2 - 50, y = currentDoc.height / 2 - 35;
     const shape = button.dataset.asset === 'ellipse' ? createEllipse({ x, y, width: 90, height: 70 }) :
       button.dataset.asset === 'line' ? createLine({ x, y }, { x: x + 100, y: y + 60 }) :
       createRect(x, y, 100, 70);
@@ -428,6 +430,27 @@ function renderEditor() {
     store.patchSelectedStyle({ strokeWidth: Math.max(0, value) });
     scheduleRender();
   });
+  for (const [selector, key] of [['#prop-linecap', 'strokeLinecap'], ['#prop-linejoin', 'strokeLinejoin'], ['#prop-blend', 'blendMode']]) {
+    document.querySelector(selector).addEventListener('change', (event) => {
+      store.patchSelectedStyle({ [key]: event.target.value });
+      scheduleRender();
+    });
+  }
+  document.querySelector('#prop-dash').addEventListener('change', (event) => {
+    const value = event.target.value.trim().replace(/[^0-9., ]/g, '').replace(/,/g, ' ');
+    store.patchSelectedStyle({ strokeDasharray: value || null });
+    scheduleRender();
+  });
+  const updateDocumentSize = () => {
+    const width = Number(document.querySelector('#document-width').value);
+    const height = Number(document.querySelector('#document-height').value);
+    if (Number.isFinite(width) && Number.isFinite(height)) {
+      store.setDocumentSize(width, height);
+      scheduleRender();
+    }
+  };
+  document.querySelector('#document-width').addEventListener('change', updateDocumentSize);
+  document.querySelector('#document-height').addEventListener('change', updateDocumentSize);
   document.querySelectorAll('[data-transform]').forEach((input) => {
     input.addEventListener('change', () => {
       if (input.value.trim() === '') return;
@@ -473,12 +496,27 @@ function updatePanels() {
   const layerList = document.querySelector('#layer-list');
   if (layerList) {
     layerList.innerHTML = store.doc.peek().layers.slice().reverse().map((layer) => `
-      <div class="layer-list-row" data-layer-id="${escapeHtml(layer.id)}">
+      <div class="layer-list-row ${store.activeLayerId.peek() === layer.id ? 'active' : ''}" data-layer-id="${escapeHtml(layer.id)}">
         <button type="button" class="layer-visibility" data-layer-visible="${escapeHtml(layer.id)}" title="Toggle visibility">${layer.visible ? '◉' : '○'}</button>
-        <span class="layer-list-name">${escapeHtml(layer.name)}</span><span class="layer-list-count">${layer.shapes.length}</span>
+        <button type="button" class="layer-select" data-layer-select="${escapeHtml(layer.id)}" title="Set active layer">${escapeHtml(layer.name)}</button>
+        <span class="layer-list-count">${layer.shapes.length}</span>
+        <button type="button" class="layer-rename" data-layer-rename="${escapeHtml(layer.id)}" title="Rename layer">✎</button>
+        <button type="button" class="layer-delete" data-layer-delete="${escapeHtml(layer.id)}" title="Delete empty layer" ${layer.shapes.length ? 'disabled' : ''}>×</button>
       </div>`).join('');
     layerList.querySelectorAll('[data-layer-visible]').forEach((button) => button.addEventListener('click', () => {
       store.toggleLayerVisible(button.dataset.layerVisible); scheduleRender();
+    }));
+    layerList.querySelectorAll('[data-layer-select]').forEach((button) => button.addEventListener('click', () => {
+      store.setActiveLayer(button.dataset.layerSelect); scheduleRender();
+    }));
+    layerList.querySelectorAll('[data-layer-rename]').forEach((button) => button.addEventListener('click', () => {
+      const layer = store.doc.peek().layers.find((item) => item.id === button.dataset.layerRename);
+      const name = prompt('Layer name', layer?.name || '');
+      if (name) store.renameLayer(button.dataset.layerRename, name);
+      scheduleRender();
+    }));
+    layerList.querySelectorAll('[data-layer-delete]').forEach((button) => button.addEventListener('click', () => {
+      store.deleteEmptyLayer(button.dataset.layerDelete); scheduleRender();
     }));
   }
   document.querySelector('#status-text').textContent = store.statusText.peek();
@@ -534,6 +572,19 @@ function updatePanels() {
   document.querySelector('#stroke-value').textContent = stroke === '__mixed__' ? 'Mixed' : (stroke || 'None').toUpperCase();
   setField('#prop-opacity', opacity === '__mixed__' ? '' : opacity == null ? 100 : numberText(opacity * 100));
   setField('#prop-stroke-width', strokeWidth === '__mixed__' ? '' : strokeWidth == null ? 0 : numberText(strokeWidth));
+  const setSelect = (selector, key, fallback) => {
+    const value = uniform(key);
+    const element = document.querySelector(selector);
+    if (!element) return;
+    element.disabled = !hasSelection;
+    if (value !== '__mixed__') element.value = value || fallback;
+  };
+  setSelect('#prop-linecap', 'strokeLinecap', 'butt');
+  setSelect('#prop-linejoin', 'strokeLinejoin', 'miter');
+  setSelect('#prop-blend', 'blendMode', 'normal');
+  setField('#prop-dash', uniform('strokeDasharray') === '__mixed__' ? '' : uniform('strokeDasharray') || '');
+  document.querySelector('#document-width').value = String(store.doc.peek().width);
+  document.querySelector('#document-height').value = String(store.doc.peek().height);
   document.querySelectorAll('[data-transform]').forEach((input) => { input.disabled = !hasSelection; });
   document.querySelectorAll('[data-tool]').forEach((button) => {
     button.classList.toggle('active', button.dataset.tool === store.activeTool.peek());
