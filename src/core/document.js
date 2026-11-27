@@ -27,12 +27,18 @@ export const DEFAULT_STYLE = Object.freeze({
  * @property {string|null} stroke      CSS colour or null for "none"
  * @property {number} strokeWidth
  * @property {number} opacity          0..1
+ * @property {'butt'|'round'|'square'} [strokeLinecap]
+ * @property {'miter'|'round'|'bevel'} [strokeLinejoin]
+ * @property {string|null} [strokeDasharray]
+ * @property {'normal'|'multiply'|'screen'|'overlay'|'darken'|'lighten'|'color-dodge'|'color-burn'|'difference'|'exclusion'} [blendMode]
+ * @property {{type:'linear'|'radial',angle:number,stops:{offset:number,color:string,opacity:number}[]}|null} [fillGradient]
  *
  * @typedef {Object} Shape
  * @property {string} id
  * @property {'rect'|'ellipse'|'line'|'path'} kind
  * @property {string} name              human readable, shown in Layers panel
  * @property {boolean} visible
+ * @property {number} [rotation]        rotation metadata in degrees after geometry transforms
  * @property {ShapeStyle} style
  * @property {Object} geometry          kind-specific payload (see below)
  *
