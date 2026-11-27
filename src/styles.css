@@ -89,3 +89,12 @@ kbd { padding: 2px 5px; border: 1px solid #3b475b; border-radius: 4px; color: #c
   stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
 }
+
+.ghost-line {
+  fill: none;
+  stroke: #60a5fa;
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
