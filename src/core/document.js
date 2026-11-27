@@ -267,8 +267,8 @@ export function setShapeFromBox(kind, box, style) {
  */
 export function validateDocument(value) {
   const finite = (number) => Number.isFinite(number);
-  const validColor = (color) => color === null || (typeof color === 'string' && /^#[0-9a-f]{3,8}$/i.test(color));
-  if (!value || typeof value !== 'object' || !Array.isArray(value.layers) ||
+  const validColor = (color) => color === null || (typeof color === 'string' && /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(color));
+  if (!value || typeof value !== 'object' || typeof value.id !== 'string' || typeof value.name !== 'string' || !Array.isArray(value.layers) ||
       !finite(value.width) || !finite(value.height) || value.width < 1 || value.height < 1 ||
       value.width > 100000 || value.height > 100000) {
     throw new TypeError('Invalid Vectorize document dimensions or layers');
@@ -302,7 +302,7 @@ export function validateDocument(value) {
         if (!gradient || !['linear', 'radial'].includes(gradient.type) || !finite(gradient.angle) ||
             !Array.isArray(gradient.stops) || gradient.stops.length < 2 ||
             gradient.stops.some((stop) => !stop || !finite(stop.offset) || stop.offset < 0 || stop.offset > 1 ||
-              !validColor(stop.color) || !finite(stop.opacity ?? 1) || (stop.opacity ?? 1) < 0 || (stop.opacity ?? 1) > 1)) {
+              (typeof stop.color !== 'string' || !validColor(stop.color)) || !finite(stop.opacity ?? 1) || (stop.opacity ?? 1) < 0 || (stop.opacity ?? 1) > 1)) {
           throw new TypeError('Invalid gradient appearance');
         }
       }
