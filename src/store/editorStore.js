@@ -238,8 +238,22 @@ export function rotateSelectedBy(degrees) {
   const shapes = getSelectedShapes();
   const amount = Number(degrees);
   if (!shapes.length || !Number.isFinite(amount) || Math.abs(amount) < 1e-9) return;
-  const rotation = shapes[0].rotation || 0;
-  setSelectedRotation(rotation + amount);
+  const bounds = boundsOf(shapes);
+  const center = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+  const ids = selection.peek();
+  const angle = amount * Math.PI / 180;
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+  transact('Rotate selection', (draft) => {
+    for (const id of ids) {
+      const shape = findShape(draft, id)?.shape;
+      if (!shape) continue;
+      transformShapePoints(shape, (point) => {
+        const x = point.x - center.x, y = point.y - center.y;
+        return { x: center.x + x * cos - y * sin, y: center.y + x * sin + y * cos };
+      });
+      shape.rotation = (shape.rotation || 0) + amount;
+    }
+  });
 }
 
 /** Set an absolute rotation angle for selected objects around selection center. */
