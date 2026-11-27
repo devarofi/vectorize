@@ -304,6 +304,9 @@ export function clearSelection() {
 /* ------------------------------------------------------------------ */
 
 export function toggleLayerVisible(layerId) {
+  const current = doc.peek().layers.find((layer) => layer.id === layerId);
+  if (!current) return;
+  if (current.visible && doc.peek().layers.filter((layer) => layer.visible).length <= 1) return;
   transact('Toggle layer visibility', (draft) => {
     const layer = draft.layers.find((l) => l.id === layerId);
     if (layer) layer.visible = !layer.visible;
