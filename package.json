@@ -11,7 +11,7 @@
     "test": "node --test"
   },
   "engines": {
-    "node": ">=20"
+    "node": "22.x"
   },
   "dependencies": {
     "@daevsoft/jetz": "^1.3.1"
