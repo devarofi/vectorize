@@ -195,3 +195,21 @@ kbd { padding: 2px 5px; border: 1px solid #3b475b; border-radius: 4px; color: #c
   .workspace { grid-template-columns: 56px minmax(240px, 1fr) 250px; }
   .tool-rail { padding-inline: 6px; }
 }
+
+.color-spectrum {
+  height: 58px;
+  border: 1px solid #46546a;
+  border-radius: 5px;
+  background:
+    linear-gradient(to top, rgba(0,0,0,.85), transparent),
+    linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+}
+.gradient-preview {
+  height: 25px;
+  border: 1px solid #46546a;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #111827, #7dd3fc, #f8fafc);
+  margin: 6px 0 10px;
+}
+.type-family { margin-bottom: 9px; }
+.type-controls { margin-top: 8px; }
