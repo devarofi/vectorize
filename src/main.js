@@ -710,9 +710,23 @@ function downloadBlob(filename, blob) {
 
 function exportSvg(doc) {
   const shapes = doc.layers.filter((layer) => layer.visible).flatMap((layer) => layer.shapes.filter((shape) => shape.visible));
+  const gradientId = (shape) => `vectorize-gradient-${String(shape.id).replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+  const defs = shapes.filter((shape) => shape.style?.fillGradient).map((shape) => {
+    const gradient = shape.style.fillGradient;
+    const id = gradientId(shape);
+    const stops = gradient.stops.map((stop) =>
+      `<stop offset="${stop.offset * 100}%" stop-color="${escapeHtml(stop.color)}" stop-opacity="${stop.opacity ?? 1}"/>`
+    ).join('');
+    if (gradient.type === 'radial') return `<radialGradient id="${id}" cx="50%" cy="50%" r="50%">${stops}</radialGradient>`;
+    const angle = (gradient.angle || 0) * Math.PI / 180;
+    const x1 = 50 - Math.cos(angle) * 50, y1 = 50 - Math.sin(angle) * 50;
+    const x2 = 50 + Math.cos(angle) * 50, y2 = 50 + Math.sin(angle) * 50;
+    return `<linearGradient id="${id}" x1="${x1}%" y1="${y1}%" x2="${x2}%" y2="${y2}%">${stops}</linearGradient>`;
+  }).join('');
   const nodes = shapes.map((shape) => {
     const s = shape.style || {};
-    const paint = `fill="${escapeHtml(s.fill || 'none')}" stroke="${escapeHtml(s.stroke || 'none')}" stroke-width="${Number(s.strokeWidth) || 0}" stroke-linecap="${s.strokeLinecap || 'butt'}" stroke-linejoin="${s.strokeLinejoin || 'miter'}" stroke-dasharray="${s.strokeDasharray || 'none'}" opacity="${Number.isFinite(s.opacity) ? s.opacity : 1}" style="mix-blend-mode:${s.blendMode || 'normal'}"`;
+    const fill = s.fillGradient ? `url(#${gradientId(shape)})` : (s.fill || 'none');
+    const paint = `fill="${escapeHtml(fill)}" stroke="${escapeHtml(s.stroke || 'none')}" stroke-width="${Number(s.strokeWidth) || 0}" stroke-linecap="${s.strokeLinecap || 'butt'}" stroke-linejoin="${s.strokeLinejoin || 'miter'}" stroke-dasharray="${s.strokeDasharray || 'none'}" opacity="${Number.isFinite(s.opacity) ? s.opacity : 1}" style="mix-blend-mode:${s.blendMode || 'normal'}"`;
     const g = shape.geometry;
     if (shape.kind === 'rect') return `<rect x="${g.x}" y="${g.y}" width="${g.width}" height="${g.height}" rx="${g.rx || 0}" ry="${g.ry || 0}" ${paint}/>`;
     if (shape.kind === 'ellipse') return `<ellipse cx="${g.cx}" cy="${g.cy}" rx="${g.rx}" ry="${g.ry}" ${paint}/>`;
@@ -723,7 +737,7 @@ function exportSvg(doc) {
     }
     return '';
   }).join('');
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${doc.width}" height="${doc.height}" viewBox="0 0 ${doc.width} ${doc.height}">${nodes}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${doc.width}" height="${doc.height}" viewBox="0 0 ${doc.width} ${doc.height}"><defs>${defs}</defs>${nodes}</svg>`;
 }
 function starPoints(cx, cy, outer, inner, count) {
   return Array.from({ length: count * 2 }, (_, index) => {
