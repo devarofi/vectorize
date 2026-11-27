@@ -179,9 +179,16 @@ export function setShapeBox(id, box) {
 export function applyBoxToShape(shape, box) {
   const g = shape.geometry;
   switch (shape.kind) {
-    case 'rect':
+    case 'rect': {
+      const sx = g.width === 0 ? 1 : box.width / g.width;
+      const sy = g.height === 0 ? 1 : box.height / g.height;
       g.x = box.x; g.y = box.y; g.width = box.width; g.height = box.height;
+      if (Number.isFinite(g.rx)) g.rx *= Math.abs(sx);
+      if (Number.isFinite(g.ry)) g.ry *= Math.abs(sy);
       break;
+    }
+      break;
+    }
     case 'ellipse':
       g.cx = box.x + box.width / 2; g.cy = box.y + box.height / 2;
       g.rx = box.width / 2; g.ry = box.height / 2;
@@ -331,7 +338,10 @@ export function moveShapeZ(shapeId, dir) {
 /** Apply one Chaikin smoothing pass to selected open/closed polyline paths. */
 export function smoothSelectedPaths() {
   const ids = selection.peek();
-  if (!ids.length) return;
+  if (!ids.some((id) => {
+    const shape = findShape(doc.peek(), id)?.shape;
+    return shape?.kind === 'path' && shape.geometry.points.length >= 3;
+  })) return;
   transact('Smooth paths', (draft) => {
     for (const id of ids) {
       const found = findShape(draft, id);
