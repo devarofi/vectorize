@@ -200,6 +200,19 @@ export function distributeSelected(axis = 'x') {
 function shapePointsForTransform(shape) {
   const g = shape.geometry;
   if (shape.kind === 'rect') {
+    const rx = Math.min(g.rx || 0, g.width / 2), ry = Math.min(g.ry || 0, g.height / 2);
+    if (rx > 0 && ry > 0) {
+      const corners = [
+        { x: g.x + g.width - rx, y: g.y + ry, start: -90 },
+        { x: g.x + g.width - rx, y: g.y + g.height - ry, start: 0 },
+        { x: g.x + rx, y: g.y + g.height - ry, start: 90 },
+        { x: g.x + rx, y: g.y + ry, start: 180 },
+      ];
+      return corners.flatMap((corner) => Array.from({ length: 9 }, (_, index) => {
+        const angle = (corner.start + index * 90 / 8) * Math.PI / 180;
+        return { x: corner.x + Math.cos(angle) * rx, y: corner.y + Math.sin(angle) * ry };
+      }));
+    }
     return [
       { x: g.x, y: g.y }, { x: g.x + g.width, y: g.y },
       { x: g.x + g.width, y: g.y + g.height }, { x: g.x, y: g.y + g.height },
