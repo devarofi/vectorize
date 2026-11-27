@@ -38,14 +38,14 @@
 
 ## 2. Left toolbar — tool inventory
 
-The visible toolbar is grouped into logical sections. Only the already implemented Select, Pen, Rectangle, Ellipse, and Line controls are wired. Other controls are placeholders with labels/tooltips and no action.
+The visible toolbar is grouped into logical sections. Implemented tools are wired to actual SVG/document operations; tools whose document model is not ready are disabled to avoid fake affordances.
 
 ### Selection tools
 - [~] Selection tool
 - [ ] Direct Selection tool
 - [ ] Group Selection tool
-- [ ] Magic Wand tool
-- [ ] Lasso tool
+- [x] Magic Wand tool (matches fill, stroke, stroke width and opacity)
+- [x] Lasso tool (freeform selection by object center)
 
 ### Drawing and path tools
 - [~] Pen tool (basic polyline path)
@@ -71,10 +71,10 @@ The visible toolbar is grouped into logical sections. Only the already implement
 - [x] Polygon tool (six-sided default)
 - [x] Star tool (five-point default)
 - [~] Line Segment tool
-- [ ] Arc tool
-- [ ] Spiral tool
-- [ ] Rectangular Grid tool
-- [ ] Polar Grid tool
+- [x] Arc tool (sampled semicircle path)
+- [x] Spiral tool (sampled three-turn path)
+- [x] Rectangular Grid tool (independent line objects)
+- [x] Polar Grid tool (ellipse rings and radial lines)
 - [ ] Flare tool
 
 ### Paint and color tools
@@ -103,7 +103,7 @@ The visible toolbar is grouped into logical sections. Only the already implement
 ### Symbol, graph and navigation tools
 - [ ] Symbol Sprayer, Shifter, Scruncher, Sizer, Spinner, Stainer, Screener and Styler tools
 - [ ] Graph tools: column, stacked column, bar, stacked bar, line, area, scatter, pie, radar
-- [ ] Artboard tool
+- [~] Artboard dimensions editable in Document properties
 - [ ] Slice and Slice Selection tools
 - [ ] Measure tool
 - [ ] Perspective Grid and Perspective Selection tools
@@ -244,9 +244,9 @@ The right panel combines functional selection-aware Transform and Appearance con
 - [x] Join choices visual: Miter, Round, Bevel
 - [x] Stroke profile selector visual
 - [ ] Editable stroke weight with units
-- [ ] Cap and join behavior
+- [x] Cap and join behavior
 - [ ] Miter limit
-- [ ] Dashed line pattern and dash offset
+- [x] Dashed line pattern (numeric dash sequence; offset deferred)
 - [ ] Stroke alignment: center, inside, outside
 - [ ] Arrowheads and endpoint markers
 - [ ] Variable-width profile editor
@@ -258,21 +258,21 @@ The right panel combines functional selection-aware Transform and Appearance con
 - [x] Align top, vertical center, align bottom (functional)
 - [x] Align-to selector visual
 - [x] Equal-gap horizontal and vertical distribution
-- [ ] Align to selection
+- [x] Align to selection bounds
 - [ ] Align to key object
 - [ ] Align to artboard
 - [ ] Align to canvas
-- [ ] Distribute object centers
-- [ ] Distribute object spacing with numeric gap
+- [x] Distribute object spacing with equal gaps
+- [ ] Distribute object centers with selectable reference
 - [ ] Smart distribute and spacing preview
 - [ ] Align to pixel grid
 
 ### Pathfinder and geometry operations
 - [x] Unite, Minus Front, Intersect and Exclude button visuals
-- [ ] Unite
-- [ ] Minus Front / subtract
-- [ ] Intersect
-- [ ] Exclude
+- [ ] Unite (requires robust closed-path Boolean engine)
+- [ ] Minus Front / subtract (requires robust closed-path Boolean engine)
+- [ ] Intersect (requires robust closed-path Boolean engine)
+- [ ] Exclude (requires robust closed-path Boolean engine)
 - [ ] Divide
 - [ ] Trim
 - [ ] Merge
@@ -313,7 +313,7 @@ The right panel combines functional selection-aware Transform and Appearance con
 - [x] Blend mode selector (Normal, Multiply, Screen, Overlay, Darken, Lighten, Dodge, Burn, Difference, Exclusion)
 - [x] Isolate blending state visual
 - [ ] Editable opacity
-- [ ] Blend modes (Normal, Multiply, Screen, Overlay, etc.)
+- [x] Blend modes (Normal, Multiply, Screen, Overlay, Darken, Lighten, Dodge, Burn, Difference, Exclusion)
 - [ ] Opacity mask creation and editing
 - [ ] Clip mask / invert mask / release mask
 - [ ] Knockout groups and isolation
@@ -581,7 +581,7 @@ This is the per-button inventory for the current left toolbar. A visible button 
 - Unsupported toolbar entries are disabled and do not pretend to be functional.
 - File/Edit/Object/View menus now expose working document, selection, arrange, align and viewport commands.
 - The Layers tab supports creating, renaming, activating, hiding/showing and deleting empty layers; the Assets tab inserts reusable primitive presets.
-- The drawing tool set includes rounded rectangle, polygon, star, pencil/freehand, constant-width paintbrush, smooth, eyedropper, click-to-delete eraser, hand and zoom.
+- The drawing tool set includes rounded rectangle, polygon, star, arc, spiral, rectangular/polar grid, pencil/freehand, constant-width paintbrush, smooth, magic wand, lasso, eyedropper, click-to-delete eraser, hand and zoom.
 - Native save/open uses a versioned JSON envelope; SVG export serializes currently supported primitive geometry.
 - The Properties panel supports editable stroke cap/join/dash and blend mode; document width/height are editable when no object is selected.
 - Some advanced items remain intentionally deferred because the current document model does not yet represent them (text objects, symbol instances, graph data, live-paint regions, variable-width strokes, mesh patches, and path Boolean topology).
