@@ -248,3 +248,17 @@ kbd { padding: 2px 5px; border: 1px solid #3b475b; border-radius: 4px; color: #c
 .asset-line { height: 0; border-width: 1px 0 0; transform: rotate(-22deg); }
 .asset-star { border: 0; color: #f5b942; font-size: 28px; line-height: 24px; }
 .inspector-page { min-height: 100%; }
+
+.compact-select {
+  width: 116px; max-width: 58%; border: 1px solid #34445b; border-radius: 5px;
+  padding: 5px 7px; color: #dbe5f2; background: #111a29; font-size: 11px;
+}
+.layer-list-row.active { border-color: #3978b8; background: #17283e; }
+.layer-select {
+  flex: 1; min-width: 0; overflow: hidden; border: 0; padding: 3px 0;
+  color: #cbd5e1; background: transparent; text-align: left; text-overflow: ellipsis; white-space: nowrap; font-size: 12px;
+}
+.layer-rename, .layer-delete {
+  width: 22px; height: 22px; border: 0; border-radius: 4px; color: #91a5be; background: transparent;
+}
+.layer-rename:hover, .layer-delete:hover { color: #fff; background: #30435c; }
