@@ -23,7 +23,7 @@ function scheduleRender() {
 const toolButton = (glyph, label, shortcut = '', tool = '', extraClass = '') => {
   const active = tool === 'select' ? ' active' : '';
   const data = tool ? `data-tool="${tool}"` : 'data-feature-tool';
-  return `<button class="tool-button${active} ${extraClass}" ${data} type="button" title="${label}${shortcut ? ` (${shortcut})` : ''}" aria-label="${label}"><span class="tool-glyph">${glyph}</span>${shortcut ? `<small>${shortcut}</small>` : ''}</button>`;
+  return `<button class="tool-button${active} ${extraClass}" ${data} type="button" title="${label}${shortcut && tool ? ` (${shortcut})` : ''}" aria-label="${label}"><span class="tool-glyph">${glyph}</span>${shortcut && tool ? `<small>${shortcut}</small>` : ''}</button>`;
 };
 
 function renderEditor() {
