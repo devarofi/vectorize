@@ -194,7 +194,7 @@ The visible toolbar is grouped into logical sections. Only the already implement
 ## 5. Core vector capabilities
 
 - [~] Basic rectangle, ellipse, line and polyline path geometry
-- [~] Selection, move, resize, delete
+- [~] Selection, move, resize (live object preview while dragging), delete
 - [~] Basic fill style
 - [~] Undo/redo
 - [ ] Cubic Bézier path segments and handles
@@ -253,6 +253,7 @@ The visible toolbar is grouped into logical sections. Only the already implement
 
 - UI buttons without a backing feature are intentionally inert; they must not mutate document state.
 - Existing basic tool buttons remain wired so current drawing workflows continue to work.
+- Resize previews update the selected SVG objects and selection handles on every animation-frame pointer update; pointer-up commits one history entry.
 - The fill color input is retained as the one existing inspector action.
 - Controls are grouped by user intent, not by a promise of exact Adobe Illustrator behavior.
 - Feature parity is not a goal by itself; each item must be justified by a useful vector-design workflow and a maintainable document model.
