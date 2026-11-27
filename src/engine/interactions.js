@@ -54,6 +54,7 @@ export class InteractionController {
     on(this.svg, 'pointerdown', (e) => this.#onPointerDown(e));
     on(window, 'pointermove', (e) => this.#onPointerMove(e));
     on(window, 'pointerup', (e) => this.#onPointerUp(e));
+    on(window, 'pointercancel', () => this.#onPointerCancel());
     on(this.svg, 'wheel', (e) => this.#onWheel(e), { passive: false });
     on(this.svg, 'dblclick', () => this.#finishPen());
     on(window, 'keydown', (e) => this.#onKeyDown(e));
@@ -427,6 +428,19 @@ export class InteractionController {
         break;
       }
     }
+  }
+
+  #onPointerCancel() {
+    const gesture = this.gesture;
+    if (!gesture) return;
+    this.gesture = null;
+    this._pendingPreview = null;
+    if (gesture.mode === 'move' || gesture.mode === 'resize') store.endTransformGesture(null);
+    this.renderer.hideGhost();
+    this.renderer.hideMarquee();
+    this.renderer.hidePenPreview();
+    this.renderer.render();
+    this.#setCursor('default');
   }
 
   /* ---------------------------------------------------------------- */
