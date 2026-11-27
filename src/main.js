@@ -516,13 +516,15 @@ function updatePanels() {
   document.querySelector('.canvas-meta span').textContent = `ARTBOARD · ${store.doc.peek().width} × ${store.doc.peek().height}`;
   const layerList = document.querySelector('#layer-list');
   if (layerList) {
-    layerList.innerHTML = store.doc.peek().layers.slice().reverse().map((layer) => `
+    const documentLayers = store.doc.peek().layers;
+    const visibleLayerCount = documentLayers.filter((layer) => layer.visible).length;
+    layerList.innerHTML = documentLayers.slice().reverse().map((layer) => `
       <div class="layer-list-row ${store.activeLayerId.peek() === layer.id ? 'active' : ''}" data-layer-id="${escapeHtml(layer.id)}">
-        <button type="button" class="layer-visibility" data-layer-visible="${escapeHtml(layer.id)}" title="Toggle visibility">${layer.visible ? '◉' : '○'}</button>
+        <button type="button" class="layer-visibility" data-layer-visible="${escapeHtml(layer.id)}" title="Toggle visibility" ${layer.visible && visibleLayerCount <= 1 ? 'disabled' : ''}>${layer.visible ? '◉' : '○'}</button>
         <button type="button" class="layer-select" data-layer-select="${escapeHtml(layer.id)}" title="Set active layer">${escapeHtml(layer.name)}</button>
         <span class="layer-list-count">${layer.shapes.length}</span>
         <button type="button" class="layer-rename" data-layer-rename="${escapeHtml(layer.id)}" title="Rename layer">✎</button>
-        <button type="button" class="layer-delete" data-layer-delete="${escapeHtml(layer.id)}" title="Delete empty layer" ${layer.shapes.length ? 'disabled' : ''}>×</button>
+        <button type="button" class="layer-delete" data-layer-delete="${escapeHtml(layer.id)}" title="Delete empty layer" ${layer.shapes.length || documentLayers.length <= 1 ? 'disabled' : ''}>×</button>
       </div>`).join('');
     layerList.querySelectorAll('[data-layer-visible]').forEach((button) => button.addEventListener('click', () => {
       store.toggleLayerVisible(button.dataset.layerVisible); scheduleRender();
