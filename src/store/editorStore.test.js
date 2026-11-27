@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import * as store from './editorStore.js';
-import { createRect } from '../core/document.js';
+import { createRect, createDocument, validateDocument } from '../core/document.js';
 
 test('Properties transform edits preserve multi-selection layout and undo/redo', () => {
   store.newDocument();
@@ -123,4 +123,17 @@ test('Equal-gap distribution and fill/stroke swap are undoable', () => {
   assert.equal(store.getSelectedShapes()[0].style.stroke, '#ff0000');
   store.undo();
   assert.equal(store.getSelectedShapes()[0].style.fill, '#ff0000');
+});
+
+test('Imported Vectorize documents are validated before replacing editor state', () => {
+  const valid = createDocument({ name: 'Imported', width: 640, height: 480 });
+  assert.deepEqual(validateDocument(valid), valid);
+
+  const invalid = structuredClone(valid);
+  invalid.layers[0].shapes.push({
+    id: 'bad-shape', kind: 'rect', name: 'Unsafe', visible: true,
+    style: { fill: 'url(javascript:alert(1))', stroke: null, strokeWidth: 1, opacity: 1 },
+    geometry: { x: 0, y: 0, width: 20, height: 20 },
+  });
+  assert.throws(() => validateDocument(invalid), /Invalid shape appearance/);
 });
