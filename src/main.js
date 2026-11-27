@@ -378,6 +378,9 @@ function renderEditor() {
     if (!file) return;
     try {
       const parsed = JSON.parse(await file.text());
+      if (parsed.format && (parsed.format !== 'vectorize' || parsed.version !== 1)) {
+        throw new Error('Unsupported Vectorize document version');
+      }
       store.replaceDocument(parsed.document || parsed);
     } catch (error) {
       alert(`Could not open document: ${error.message}`);
@@ -621,6 +624,10 @@ function downloadFile(filename, content, type) {
 }
 
 function exportPng(doc) {
+  if (doc.width * doc.height > 64000000 || doc.width > 16384 || doc.height > 16384) {
+    alert('PNG export is limited to 64 megapixels and 16384 px per side.');
+    return;
+  }
   const source = new Blob([exportSvg(doc)], { type: 'image/svg+xml;charset=utf-8' });
   const url = URL.createObjectURL(source);
   const image = new Image();
