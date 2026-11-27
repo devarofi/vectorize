@@ -490,7 +490,7 @@ export class InteractionController {
       return;
     }
     // Tool hotkeys.
-    const hotkeys = { v: 'select', r: 'rect', o: 'ellipse', l: 'line', p: 'pen', b: 'pencil', i: 'eyedropper', h: 'hand', z: 'zoom' };
+    const hotkeys = { v: 'select', r: 'rect', o: 'ellipse', l: 'line', p: 'pen', b: 'brush', n: 'pencil', i: 'eyedropper', h: 'hand', z: 'zoom' };
     const tool = hotkeys[e.key.toLowerCase()];
     if (tool && !mod) {
       store.activeTool.value = tool;
