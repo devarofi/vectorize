@@ -17,7 +17,7 @@
 - [x] File, Edit, Object, Select, View, Window and Help menus
 - [~] Type and Effect menus are present but disabled until their document models exist
 - [x] Undo / Redo and Fit canvas commands
-- [x] New document, Open/Save versioned Vectorize JSON, Export SVG and PNG (1×)
+- [x] New document, Open/Save versioned Vectorize JSON, Import supported SVG primitives, Export SVG and PNG (1×)
 - [x] Select all, Deselect, Duplicate, Delete
 - [x] Arrange to front/back and align selected objects
 - [x] View zoom in/out and fit artboard
@@ -550,7 +550,7 @@ This is the per-button inventory for the current left toolbar. A visible button 
 
 - [x] Versioned Vectorize JSON document save/open (manual download/upload)
 - [ ] Autosave/recovery and document tabs
-- [ ] SVG import with sanitization
+- [~] SVG import for safe basic primitives (rect, rounded rect, ellipse, line, polygon/polyline and M/L/Z paths); transformed groups and curve commands are skipped
 - [x] SVG export (current supported primitive geometry)
 - [x] PNG export at 1× with canvas size safeguards
 - [ ] PNG export at configurable scale/background
