@@ -102,7 +102,8 @@ export class InteractionController {
   /* ---------------------------------------------------------------- */
 
   #onPointerDown(e) {
-    if (e.button === 1 || (e.button === 0 && this.spaceDown)) {
+    const initialTool = store.activeTool.peek();
+    if (e.button === 1 || (e.button === 0 && (this.spaceDown || initialTool === 'hand'))) {
       this.gesture = { mode: 'pan', last: this.#toCanvasPoint(e) };
       this.#setCursor('grabbing');
       e.preventDefault();
@@ -113,7 +114,43 @@ export class InteractionController {
     const point = this.#world(e);
     const tool = store.activeTool.peek();
 
-    if (tool === 'rect' || tool === 'ellipse' || tool === 'line') {
+    if (tool === 'zoom') {
+      store.zoom(e.shiftKey ? 0.8 : 1.25, this.#toCanvasPoint(e));
+      this.renderer.render();
+      return;
+    }
+    if (tool === 'eyedropper') {
+      const hit = hitTest(allShapes(store.doc.peek()), point, 8, store.viewport.peek().scale);
+      if (hit) {
+        const sampled = store.doc.peek().layers.flatMap((layer) => layer.shapes).find((shape) => shape.id === hit.id);
+        if (sampled) {
+          if (!store.selection.peek().length) store.select([sampled.id]);
+          else store.patchSelectedStyle({ ...sampled.style });
+          store.statusText.value = `Sampled appearance from ${sampled.name}`;
+          this.renderer.render();
+        }
+      }
+      return;
+    }
+    if (tool === 'eraser') {
+      const hit = hitTest(allShapes(store.doc.peek()), point, 8, store.viewport.peek().scale);
+      if (hit) {
+        store.select([hit.id]);
+        store.deleteSelected();
+        this.renderer.render();
+      }
+      return;
+    }
+    if (tool === 'smooth') {
+      store.smoothSelectedPaths();
+      this.renderer.render();
+      return;
+    }
+    if (tool === 'pencil' || tool === 'brush') {
+      this.gesture = { mode: 'freehand', points: [this.#snap(point)], last: point, kind: tool };
+      return;
+    }
+    if (['rect', 'roundRect', 'ellipse', 'line', 'polygon', 'star'].includes(tool)) {
       this.gesture = { mode: 'create', kind: tool, start: this.#snap(point), current: this.#snap(point) };
       return;
     }
@@ -231,6 +268,15 @@ export class InteractionController {
         this.renderer.render();
         break;
       }
+      case 'freehand': {
+        const p = this.#snap(this.#world(e));
+        const last = g.points[g.points.length - 1];
+        if (Math.hypot(p.x - last.x, p.y - last.y) >= 1.5 / store.viewport.peek().scale) {
+          g.points.push(p);
+          this.renderer.showPenPreview(g.points, p);
+        }
+        break;
+      }
       case 'create': {
         g.current = this.#snap(this.#world(e));
         const box = boxFromCorners(g.start, g.current);
@@ -324,14 +370,47 @@ export class InteractionController {
         break;
       }
 
+      case 'freehand': {
+        this.renderer.hidePenPreview();
+        if (g.points.length >= 2) {
+          const shape = createPath(g.points, { closed: false }, {
+            strokeWidth: g.kind === 'brush' ? 5 : 2,
+            fill: null,
+          });
+          shape.name = g.kind === 'brush' ? 'Brush stroke' : 'Pencil path';
+          store.addShape(shape);
+        }
+        this.renderer.render();
+        break;
+      }
       case 'create': {
         this.renderer.hideGhost();
         const b = boxFromCorners(g.start, g.current);
-        const shape =
-          g.kind === 'rect' && b.width >= MIN_CREATE_SIZE && b.height >= MIN_CREATE_SIZE ? rectFromDrag(g.start, g.current) :
-          g.kind === 'ellipse' && b.width >= MIN_CREATE_SIZE && b.height >= MIN_CREATE_SIZE ? createEllipse(b) :
-          g.kind === 'line' && Math.hypot(b.width, b.height) >= MIN_CREATE_SIZE ? createLine(g.start, g.current) :
-          null;
+        let shape = null;
+        if (b.width >= MIN_CREATE_SIZE && b.height >= MIN_CREATE_SIZE) {
+          if (g.kind === 'rect') shape = rectFromDrag(g.start, g.current);
+          if (g.kind === 'roundRect') {
+            shape = rectFromDrag(g.start, g.current);
+            shape.name = 'Rounded Rectangle';
+            shape.geometry.rx = Math.min(b.width, b.height) * 0.12;
+            shape.geometry.ry = shape.geometry.rx;
+          }
+          if (g.kind === 'ellipse') shape = createEllipse(b);
+          if (g.kind === 'polygon' || g.kind === 'star') {
+            const count = g.kind === 'star' ? 5 : 6;
+            const cx = b.x + b.width / 2, cy = b.y + b.height / 2;
+            const outerX = b.width / 2, outerY = b.height / 2;
+            const points = Array.from({ length: count * (g.kind === 'star' ? 2 : 1) }, (_, index) => {
+              const angle = -Math.PI / 2 + index * Math.PI / count;
+              const inner = g.kind === 'star' && index % 2;
+              const factor = inner ? 0.42 : 1;
+              return { x: cx + Math.cos(angle) * outerX * factor, y: cy + Math.sin(angle) * outerY * factor };
+            });
+            shape = createPath(points, { closed: true });
+            shape.name = g.kind === 'star' ? 'Star' : 'Polygon';
+          }
+        }
+        if (g.kind === 'line' && Math.hypot(b.width, b.height) >= MIN_CREATE_SIZE) shape = createLine(g.start, g.current);
         if (shape) {
           store.addShape(shape);
           this.renderer.render();
@@ -411,7 +490,7 @@ export class InteractionController {
       return;
     }
     // Tool hotkeys.
-    const hotkeys = { v: 'select', r: 'rect', o: 'ellipse', l: 'line', p: 'pen' };
+    const hotkeys = { v: 'select', r: 'rect', o: 'ellipse', l: 'line', p: 'pen', b: 'pencil', i: 'eyedropper', h: 'hand', z: 'zoom' };
     const tool = hotkeys[e.key.toLowerCase()];
     if (tool && !mod) {
       store.activeTool.value = tool;
