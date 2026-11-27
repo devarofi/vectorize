@@ -2,7 +2,7 @@ import * as store from './store/editorStore.js';
 import { SvgRenderer } from './engine/renderer.js';
 import { InteractionController } from './engine/interactions.js';
 import { createRouter } from './app/router.js';
-import { createRect, createEllipse, createLine } from './core/document.js';
+import { createRect, createEllipse, createLine, createPath } from './core/document.js';
 import './styles.css';
 
 const app = document.querySelector('#app');
@@ -395,8 +395,9 @@ function renderEditor() {
       createRect(x, y, 100, 70);
     if (button.dataset.asset === 'star') {
       const points = starPoints(x + 50, y + 40, 38, 17, 5);
-      store.addShape({ id: `star_${Date.now()}`, kind: 'path', name: 'Star', visible: true,
-        style: { fill: '#f5b942', stroke: '#7c4a03', strokeWidth: 2, opacity: 1 }, geometry: { points, closed: true } });
+      const star = createPath(points, { closed: true }, { fill: '#f5b942', stroke: '#7c4a03', strokeWidth: 2 });
+      star.name = 'Star';
+      store.addShape(star);
     } else store.addShape(shape);
     switchPanel('properties');
     scheduleRender();
