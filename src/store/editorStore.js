@@ -46,6 +46,7 @@ export const activeTool = stateOf('select'); // select | rect | ellipse | line |
 export const viewport = snapshotState(createViewport());
 export const gridSize = stateOf(0); // 0 disables snapping
 export const statusText = stateOf('Ready');
+export const activeLayerId = stateOf(null);
 
 /** Live preview transform applied during a drag gesture (screen px delta). */
 export const dragPreview = stateOf(/** @type {null|{ids:string[],dx:number,dy:number}} */ (null));
@@ -114,9 +115,9 @@ export function transact(label, mutate) {
 /** Add a shape to a layer (default: top-most visible layer). */
 export function addShape(shape, layerId = null) {
   transact(`Add ${shape.name}`, (draft) => {
-    const layer = layerId
-      ? draft.layers.find((l) => l.id === layerId)
-      : draft.layers[draft.layers.length - 1];
+    const requested = layerId || activeLayerId.peek();
+    const layer = (requested && draft.layers.find((l) => l.id === requested && l.visible)) ||
+      [...draft.layers].reverse().find((l) => l.visible);
     if (!layer) return;
     layer.shapes.push(shape);
   });
@@ -252,14 +253,36 @@ export function toggleShapeVisible(shapeId) {
 }
 
 export function addLayer(name) {
+  const id = `layer_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
   transact('Add layer', (draft) => {
-    draft.layers.push({
-      id: `layer_${Date.now().toString(36)}_${draft.layers.length}`,
-      name: name || `Layer ${draft.layers.length + 1}`,
-      visible: true,
-      shapes: [],
-    });
+    draft.layers.push({ id, name: name || `Layer ${draft.layers.length + 1}`, visible: true, shapes: [] });
   });
+  activeLayerId.value = id;
+}
+export function setActiveLayer(id) {
+  if (doc.peek().layers.some((layer) => layer.id === id && layer.visible)) activeLayerId.value = id;
+}
+export function renameLayer(id, name) {
+  const value = String(name || '').trim();
+  if (!value) return;
+  transact('Rename layer', (draft) => {
+    const layer = draft.layers.find((item) => item.id === id);
+    if (layer) layer.name = value.slice(0, 80);
+  });
+}
+export function deleteEmptyLayer(id) {
+  if (doc.peek().layers.length <= 1) return;
+  const layer = doc.peek().layers.find((item) => item.id === id);
+  if (!layer || layer.shapes.length) return;
+  transact('Delete layer', (draft) => { draft.layers = draft.layers.filter((item) => item.id !== id); });
+  if (activeLayerId.peek() === id) activeLayerId.value = doc.peek().layers.at(-1)?.id || null;
+}
+export function setDocumentSize(width, height) {
+  const w = Math.max(1, Math.min(100000, Number(width)));
+  const h = Math.max(1, Math.min(100000, Number(height)));
+  if (!Number.isFinite(w) || !Number.isFinite(h)) return;
+  transact('Resize artboard', (draft) => { draft.width = w; draft.height = h; });
+  resetView();
 }
 
 /**
@@ -385,6 +408,7 @@ export function replaceDocument(nextDocument) {
   }
   batch(() => {
     doc.setState(cloneDocument(nextDocument));
+    activeLayerId.value = doc.peek().layers.find((layer) => layer.visible)?.id || null;
     selection.value = [];
     history.clear();
     historyRevision.value += 1;
@@ -501,6 +525,7 @@ export function redo() {
 export function newDocument() {
   batch(() => {
     doc.value = createDocument({ name: 'Untitled' });
+    activeLayerId.value = doc.peek().layers[0]?.id || null;
     selection.value = [];
     history.clear();
     historyRevision.value += 1;
