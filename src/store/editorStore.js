@@ -285,6 +285,89 @@ export function moveShapeZ(shapeId, dir) {
   });
 }
 
+
+/** Select every visible object in the document. */
+export function selectAll() {
+  selection.value = doc.peek().layers
+    .filter((layer) => layer.visible)
+    .flatMap((layer) => layer.shapes.filter((shape) => shape.visible).map((shape) => shape.id));
+}
+
+/** Duplicate selected objects in their original layers and select the copies. */
+export function duplicateSelected() {
+  const ids = selection.peek();
+  if (!ids.length) return;
+  const copies = [];
+  transact('Duplicate objects', (draft) => {
+    for (const layer of draft.layers) {
+      const originals = layer.shapes.filter((shape) => ids.includes(shape.id));
+      for (const original of originals) {
+        const copy = cloneDocument(original);
+        copy.id = `${original.id}_copy_${Date.now().toString(36)}_${copies.length}`;
+        copy.name = `${original.name} copy`;
+        translateShape(copy, 12, 12);
+        layer.shapes.splice(layer.shapes.indexOf(original) + 1, 0, copy);
+        copies.push(copy.id);
+      }
+    }
+  });
+  selection.value = copies;
+}
+
+/** Reorder selected objects within each layer, preserving their relative order. */
+export function arrangeSelected(where) {
+  const ids = new Set(selection.peek());
+  if (!ids.size) return;
+  transact(where === 'front' ? 'Bring to front' : 'Send to back', (draft) => {
+    for (const layer of draft.layers) {
+      const chosen = layer.shapes.filter((shape) => ids.has(shape.id));
+      if (!chosen.length) continue;
+      const rest = layer.shapes.filter((shape) => !ids.has(shape.id));
+      layer.shapes = where === 'front' ? [...rest, ...chosen] : [...chosen, ...rest];
+    }
+  });
+}
+
+/** Align selected objects to the aggregate selection bounds. */
+export function alignSelected(mode) {
+  const shapes = getSelectedShapes();
+  if (shapes.length < 2) return;
+  const bounds = boundsOf(shapes);
+  if (!bounds) return;
+  const ids = selection.peek();
+  transact(`Align ${mode}`, (draft) => {
+    for (const id of ids) {
+      const found = findShape(draft, id);
+      if (!found) continue;
+      const box = shapeBounds(found.shape);
+      const next = { ...box };
+      if (mode === 'left') next.x = bounds.x;
+      if (mode === 'center-x') next.x = bounds.x + (bounds.width - box.width) / 2;
+      if (mode === 'right') next.x = bounds.x + bounds.width - box.width;
+      if (mode === 'top') next.y = bounds.y;
+      if (mode === 'center-y') next.y = bounds.y + (bounds.height - box.height) / 2;
+      if (mode === 'bottom') next.y = bounds.y + bounds.height - box.height;
+      applyBoxToShape(found.shape, next);
+    }
+  });
+}
+
+/** Replace the active document after validating a JSON import payload. */
+export function replaceDocument(nextDocument) {
+  if (!nextDocument || !Array.isArray(nextDocument.layers) ||
+      !Number.isFinite(nextDocument.width) || !Number.isFinite(nextDocument.height)) {
+    throw new TypeError('Invalid Vectorize document');
+  }
+  batch(() => {
+    doc.setState(cloneDocument(nextDocument));
+    selection.value = [];
+    history.clear();
+    historyRevision.value += 1;
+    resetView();
+    statusText.value = 'Document opened';
+  });
+}
+
 /* ------------------------------------------------------------------ */
 /* Viewport helpers (NOT history-tracked — view state, not artwork)    */
 /* ------------------------------------------------------------------ */
