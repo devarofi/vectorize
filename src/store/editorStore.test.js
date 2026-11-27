@@ -137,3 +137,21 @@ test('Imported Vectorize documents are validated before replacing editor state',
   });
   assert.throws(() => validateDocument(invalid), /Invalid shape appearance/);
 });
+
+test('Drawing targets the active layer and hidden-layer selection is cleared', () => {
+  store.newDocument();
+  const baseLayer = store.activeLayerId.peek();
+  store.addLayer('Foreground');
+  const foreground = store.activeLayerId.peek();
+  const shape = createRect(5, 5, 25, 25);
+  store.addShape(shape);
+
+  const doc = store.doc.peek();
+  assert.equal(doc.layers.find((layer) => layer.id === foreground).shapes[0].id, shape.id);
+  store.toggleLayerVisible(foreground);
+  assert.deepEqual(store.selection.peek(), []);
+  assert.equal(store.activeLayerId.peek(), baseLayer);
+
+  store.toggleLayerVisible(baseLayer);
+  assert.equal(store.doc.peek().layers.find((layer) => layer.id === baseLayer).visible, true);
+});
