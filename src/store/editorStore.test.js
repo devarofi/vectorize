@@ -187,3 +187,21 @@ test('Rounded rectangle corner radius is contextual and undoable', () => {
   store.undo();
   assert.equal(store.getSelectedShapes()[0].geometry.rx, undefined);
 });
+
+test('Rotation and reflection convert primitives to editable vector paths', () => {
+  store.newDocument();
+  const shape = createRect(0, 0, 100, 50);
+  store.addShape(shape);
+  store.setSelectedRotation(90);
+  const rotated = store.getSelectedShapes()[0];
+  assert.equal(rotated.kind, 'path');
+  assert.equal(rotated.rotation, 90);
+  assert.deepEqual(store.selectionBounds(), { x: 25, y: -25, width: 50, height: 100 });
+
+  store.reflectSelected('horizontal');
+  const reflected = store.getSelectedShapes()[0];
+  assert.equal(reflected.kind, 'path');
+  assert.equal(reflected.geometry.points.length, 4);
+  store.undo();
+  assert.deepEqual(store.selectionBounds(), { x: 25, y: -25, width: 50, height: 100 });
+});
