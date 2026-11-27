@@ -52,4 +52,4 @@ Before the first deployment, generate and commit `pnpm-lock.yaml` by running `pn
 
 ## Initial editor shell
 
-The current shell wires the existing document store, SVG renderer, and interaction controller into a small application UI. It includes selection, rectangle, ellipse, line, and pen tools, pan/zoom, undo/redo, a basic fill inspector, and a single-layer view. Advanced workflows are intentionally deferred to the engineering roadmap.
+The current shell wires the existing document store, SVG renderer, and interaction controller into an Illustrator-inspired workspace. The left toolbar displays the broader selection, path, type, shape, paint, transform, symbol, graph, and navigation tool families. The right inspector presents contextual Transform, Appearance, Stroke, Align, Pathfinder, Color, Gradient, Transparency, and typography sections. Only the original Select, Rectangle, Ellipse, Line, Pen, Undo/Redo, Fit Canvas, and basic Fill workflows are wired; the expanded tool and panel controls are UI placeholders. See [the Illustrator-inspired feature progress inventory](docs/architecture/04-ILLUSTRATOR-FEATURE-PROGRESS.md) for the implementation checklist.
