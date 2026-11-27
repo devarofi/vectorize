@@ -195,6 +195,23 @@ export function distributeSelected(axis = 'x') {
   });
 }
 
+
+/** Set a uniform corner radius on selected rectangle primitives. */
+export function setSelectedCornerRadius(radius) {
+  const ids = selection.peek();
+  const value = Math.max(0, Number(radius) || 0);
+  if (!ids.some((id) => findShape(doc.peek(), id)?.shape.kind === 'rect')) return;
+  transact('Set corner radius', (draft) => {
+    for (const id of ids) {
+      const shape = findShape(draft, id)?.shape;
+      if (shape?.kind !== 'rect') continue;
+      const max = Math.min(shape.geometry.width, shape.geometry.height) / 2;
+      shape.geometry.rx = Math.min(value, max);
+      shape.geometry.ry = Math.min(value, max);
+    }
+  });
+}
+
 /** Swap fill and stroke independently for every selected shape. */
 export function swapSelectedFillStroke() {
   const ids = selection.peek();
