@@ -124,16 +124,19 @@ The visible toolbar is grouped into logical sections. Only the already implement
 - [ ] Functional panel switching, collapse/expand and panel docking
 
 ### Transform
-- [x] X, Y, Width, Height field visuals
+- [x] X, Y, Width, Height fields reflect selected-object bounds
+- [x] Numeric X/Y/Width/Height editing (single and multi-selection)
 - [x] Proportions and transform-options affordances
-- [ ] Numeric position and size editing
 - [ ] Rotation, shear, reflection and scale
 - [ ] Reference point selector
 - [ ] Transform each / copy transform
 - [ ] Transform origin and units support
 
 ### Appearance
-- [~] Fill color control (existing basic implementation)
+- [~] Fill color control (selection-aware, undoable)
+- [x] Stroke color control (selection-aware, undoable)
+- [x] Opacity editing (0–100%, undoable)
+- [x] Stroke weight editing (undoable)
 - [x] Stroke row visual
 - [x] Opacity and blend-mode visuals
 - [x] Color spectrum and gradient preview placeholders
@@ -201,8 +204,8 @@ The current right panel is a visual scaffold. The checklist below tracks both th
 - [x] Height field visual
 - [x] Constrain-proportions affordance
 - [x] More-transform-options affordance
-- [ ] Read selected geometry and update values on selection
-- [ ] Edit X/Y/W/H numerically and commit through history
+- [x] Read selected geometry and update values on selection
+- [x] Edit X/Y/W/H numerically and commit through history
 - [ ] Rotation angle
 - [ ] Horizontal/vertical scale
 - [ ] Horizontal/vertical shear
@@ -569,6 +572,6 @@ This is the per-button inventory for the current left toolbar. A visible button 
 - UI buttons without a backing feature are intentionally inert; they must not mutate document state.
 - Existing basic tool buttons remain wired so current drawing workflows continue to work.
 - Resize previews apply a live SVG transform to selected objects and update selection handles during pointer movement; pointer-up commits one history entry.
-- The fill color input is retained as the one existing inspector action.
+- Fill, stroke color, opacity, stroke weight and selection bounds are now data-driven inspector controls; each edit is committed as a single undoable operation.
 - Controls are grouped by user intent, not by a promise of exact Adobe Illustrator behavior.
 - Feature parity is not a goal by itself; each item must be justified by a useful vector-design workflow and a maintainable document model.
