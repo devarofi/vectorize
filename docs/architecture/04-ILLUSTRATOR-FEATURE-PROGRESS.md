@@ -14,9 +14,10 @@
 
 ### Menus and document controls
 - [x] Application brand and document title
-- [x] File, Edit, Object, Type, Select, Effect, View, Window and Help menu surfaces
+- [x] File, Edit, Object, Select, View, Window and Help menus
+- [~] Type and Effect menus are present but disabled until their document models exist
 - [x] Undo / Redo and Fit canvas commands
-- [x] New document, Open Vectorize JSON, Save Vectorize JSON, Export SVG
+- [x] New document, Open/Save versioned Vectorize JSON, Export SVG and PNG (1×)
 - [x] Select all, Deselect, Duplicate, Delete
 - [x] Arrange to front/back and align selected objects
 - [x] View zoom in/out and fit artboard
@@ -161,7 +162,7 @@ The visible toolbar is grouped into logical sections. Implemented tools are wire
 - [ ] Expand stroke
 
 ### Alignment and distribution
-- [x] Align action grid visuals
+- [x] Functional align action grid
 - [x] Align-to target visual
 - [x] Distribution action visuals
 - [ ] Align to selection, key object, artboard and canvas
@@ -239,11 +240,10 @@ The right panel combines functional selection-aware Transform and Appearance con
 - [ ] Swatches, global colors and spot colors
 
 ### Stroke properties
-- [x] Stroke weight field visual
-- [x] Cap choices visual: Butt, Round, Projecting
-- [x] Join choices visual: Miter, Round, Bevel
-- [x] Stroke profile selector visual
-- [ ] Editable stroke weight with units
+- [x] Editable stroke weight
+- [x] Cap choices: Butt, Round, Projecting
+- [x] Join choices: Miter, Round, Bevel
+- [~] Stroke profile selector (Uniform only)
 - [x] Cap and join behavior
 - [ ] Miter limit
 - [x] Dashed line pattern (numeric dash sequence; offset deferred)
@@ -358,7 +358,7 @@ The right panel combines functional selection-aware Transform and Appearance con
 - [x] Editable document width and height
 - [x] Units selector visual (pixels only)
 - [x] Artboard label visual
-- [ ] Editable document width and height
+- [x] Editable document width and height
 - [ ] Units: px, pt, mm, cm, inches
 - [ ] Artboard list, selection and navigation
 - [ ] Artboard dimensions, orientation and presets
@@ -369,11 +369,11 @@ The right panel combines functional selection-aware Transform and Appearance con
 - [ ] Export settings and export presets
 
 ### Quick Actions and object management
-- [x] Group, Arrange, Duplicate and Lock button visuals
-- [x] Layers preview row
+- [x] Duplicate, Arrange and Delete quick actions
+- [x] Layers list with visibility, active-layer, rename and empty-layer delete controls
 - [ ] Group and ungroup
-- [ ] Duplicate and repeat duplicate
-- [ ] Bring forward/backward and bring to front/send to back
+- [x] Duplicate selected objects
+- [x] Bring to front / send to back
 - [ ] Lock/unlock and show/hide
 - [ ] Rename selected object
 - [ ] Create clipping mask and release clipping mask
@@ -387,17 +387,17 @@ The right panel combines functional selection-aware Transform and Appearance con
 This is the per-button inventory for the current left toolbar. A visible button is not considered implemented until it has a real interaction, document operation, keyboard behavior where appropriate, and tests.
 
 ### Selection group
-- [~] Selection (V) — select, move and resize objects
-- [ ] Direct Selection — select/edit individual anchors and path segments
-- [ ] Group Selection — select nested objects inside groups
-- [ ] Magic Wand — select objects by shared appearance/attributes
-- [ ] Lasso — freeform selection of anchors or objects
+- [x] Selection (V) — select, move and resize objects
+- [ ] Direct Selection — select/edit individual anchors and path segments (Bézier milestone)
+- [ ] Group Selection — select nested objects inside groups (group model pending)
+- [x] Magic Wand — select objects by matching fill, stroke, width and opacity
+- [x] Lasso — freeform object selection by center point
 
 ### Drawing and path group
-- [~] Pen (P) — basic click-to-add polyline points
-- [ ] Curvature — create/edit smooth curved paths
-- [ ] Pencil — freehand path creation
-- [ ] Smooth — reduce path noise while preserving shape
+- [~] Pen (P) — click-to-add polyline points
+- [ ] Curvature — create/edit smooth curved paths (Bézier milestone)
+- [x] Pencil — freehand polyline path creation
+- [x] Smooth — Chaikin smoothing pass on selected paths
 - [ ] Path Eraser — erase portions of paths
 - [ ] Join — join open path endpoints
 - [ ] Anchor Point — edit anchor handles and corner/smooth behavior
@@ -419,31 +419,32 @@ This is the per-button inventory for the current left toolbar. A visible button 
 - [ ] Text-to-outlines conversion and font fallback
 
 ### Shape group
-- [~] Rectangle (R)
-- [ ] Rounded Rectangle — independent corner radii
-- [~] Ellipse (O)
-- [ ] Polygon — side count and radius
-- [ ] Star — point count, inner/outer radius
-- [~] Line Segment (L)
-- [ ] Arc — arc direction and endpoints
-- [ ] Spiral — turns, decay and direction
-- [ ] Rectangular Grid — rows, columns and dividers
-- [ ] Polar Grid — concentric circles and radial dividers
+- [x] Rectangle (R)
+- [x] Rounded Rectangle — uniform corner radius
+- [x] Ellipse (O)
+- [x] Polygon — six-sided default
+- [x] Star — five-point default
+- [x] Line Segment (L)
+- [x] Arc — sampled semicircle path
+- [x] Spiral — sampled three-turn path
+- [x] Rectangular Grid — independent line objects
+- [x] Polar Grid — ellipse rings and radial lines
+- [ ] Interactive tool options for sides, points, radii and grid divisions
 - [ ] Flare — rays, rings and flare parameters
 
 ### Paint and color group
-- [ ] Paintbrush (B) — brush strokes with editable paths
+- [~] Paintbrush (B) — freehand paths with constant width
 - [ ] Blob Brush (Shift+B) — merge painted regions
 - [ ] Mesh (U) — gradient mesh points and color patches
 - [ ] Gradient (G) — interactive gradient annotator
-- [ ] Eyedropper (I) — sample and apply appearance
+- [x] Eyedropper (I) — sample and apply appearance
 - [ ] Live Paint Bucket (K) — fill detected regions
 - [ ] Live Paint Selection (Shift+L) — select live-paint regions
 - [ ] Brush library, brush presets and brush options
 - [ ] Pattern creation and pattern editing
 
 ### Transform and edit group
-- [ ] Eraser (Shift+E) — erase artwork with path-aware results
+- [~] Eraser (Shift+E) — click to delete an entire object; path-aware erase deferred
 - [ ] Scissors (C) — cut paths at selected points
 - [ ] Knife — split shapes and paths
 - [ ] Width (Shift+W) — edit variable stroke width
@@ -484,8 +485,8 @@ This is the per-button inventory for the current left toolbar. A visible button 
 
 ### Artboard, navigation and utility group
 - [ ] Artboard — create, resize, rename, reorder and export artboards
-- [ ] Hand — pan canvas
-- [ ] Zoom — zoom in/out and zoom to selection/artboard
+- [x] Hand — pan canvas
+- [x] Zoom — click zoom in, Shift-click zoom out
 - [ ] Slice — define export regions
 - [ ] Slice Selection — select and edit slices
 - [ ] Measure — measure distance, angle and dimensions
@@ -583,7 +584,7 @@ This is the per-button inventory for the current left toolbar. A visible button 
 - File/Edit/Object/View menus now expose working document, selection, arrange, align and viewport commands.
 - The Layers tab supports creating, renaming, activating, hiding/showing and deleting empty layers; the Assets tab inserts reusable primitive presets.
 - The drawing tool set includes rounded rectangle, polygon, star, arc, spiral, rectangular/polar grid, pencil/freehand, constant-width paintbrush, smooth, magic wand, lasso, eyedropper, click-to-delete eraser, hand and zoom.
-- Native save/open uses a versioned JSON envelope; SVG export serializes currently supported primitive geometry.
+- Native save/open uses a versioned JSON envelope with import validation; SVG and PNG export serialize currently supported primitive geometry.
 - The Properties panel supports editable stroke cap/join/dash and blend mode; document width/height are editable when no object is selected.
 - Some advanced items remain intentionally deferred because the current document model does not yet represent them (text objects, symbol instances, graph data, live-paint regions, variable-width strokes, mesh patches, and path Boolean topology).
 - Resize previews apply a live SVG transform to selected objects and update selection handles during pointer movement; pointer-up commits one history entry.
