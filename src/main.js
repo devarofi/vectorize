@@ -178,18 +178,18 @@ function renderEditor() {
             </section>
 
             <section class="panel-section selection-properties" id="object-properties">
-              <div class="section-heading"><h3>Transform</h3><button class="panel-more" type="button" title="More transform options">···</button></div>
+              <div class="section-heading"><h3>Transform</h3><button class="panel-more" type="button" title="More transform options" disabled>···</button></div>
               <div class="transform-grid">
                 <label class="property-field"><span>X</span><input id="prop-x" data-transform="x" type="number" step="any" value="—" disabled /></label>
                 <label class="property-field"><span>Y</span><input id="prop-y" data-transform="y" type="number" step="any" value="—" disabled /></label>
                 <label class="property-field"><span>W</span><input id="prop-width" data-transform="width" type="number" min="0" step="any" value="—" disabled /></label>
                 <label class="property-field"><span>H</span><input id="prop-height" data-transform="height" type="number" min="0" step="any" value="—" disabled /></label>
               </div>
-              <div class="property-inline-row"><button type="button" class="mini-icon-button" title="Constrain proportions">↔</button><span class="muted">Constrain proportions</span><button type="button" class="mini-icon-button" title="More transform options">⌗</button></div>
+              <div class="property-inline-row"><button type="button" class="mini-icon-button" title="Constrain proportions (not implemented)" disabled>↔</button><span class="muted">Constrain proportions</span><button type="button" class="mini-icon-button" title="More transform options (not implemented)" disabled>⌗</button></div>
             </section>
 
             <section class="panel-section selection-properties" id="appearance-properties">
-              <div class="section-heading"><h3>Appearance</h3><button class="panel-more" type="button" title="More appearance options">···</button></div>
+              <div class="section-heading"><h3>Appearance</h3><button class="panel-more" type="button" title="More appearance options" disabled>···</button></div>
               <div class="appearance-row">
                 <label class="appearance-label" for="fill-color"><span class="appearance-chip fill-chip">F</span>Fill</label>
                 <div class="appearance-control color-field"><input id="fill-color" type="color" value="#4f8ef7" /><span id="fill-value">#4F8EF7</span></div>
@@ -205,43 +205,43 @@ function renderEditor() {
             </section>
 
             <section class="panel-section selection-properties" id="stroke-properties">
-              <div class="section-heading"><h3>Stroke</h3><button class="panel-more" type="button" title="More stroke options">···</button></div>
+              <div class="section-heading"><h3>Stroke</h3><button class="panel-more" type="button" title="More stroke options" disabled>···</button></div>
               <div class="property-row"><label for="prop-stroke-width">Weight</label><input id="prop-stroke-width" class="compact-number" type="number" min="0" step="any" value="2" /></div>
               <div class="property-row"><label for="prop-linecap">Cap</label><select id="prop-linecap" class="compact-select"><option value="butt">Butt</option><option value="round">Round</option><option value="square">Projecting</option></select></div>
               <div class="property-row"><label for="prop-linejoin">Join</label><select id="prop-linejoin" class="compact-select"><option value="miter">Miter</option><option value="round">Round</option><option value="bevel">Bevel</option></select></div>
               <div class="property-row"><label for="prop-dash">Dash</label><input id="prop-dash" class="compact-number" type="text" placeholder="e.g. 8 4" /></div>
-              <div class="property-row"><span>Profile</span><div class="fake-select">Uniform <span>⌄</span></div></div>
+              <div class="property-row"><span>Profile</span><span class="muted">Uniform</span></div>
             </section>
 
             <section class="panel-section selection-properties" id="align-properties">
-              <div class="section-heading"><h3>Align</h3><button class="panel-more" type="button" title="More alignment options">···</button></div>
+              <div class="section-heading"><h3>Align</h3><button class="panel-more" type="button" title="More alignment options" disabled>···</button></div>
               <div class="icon-action-grid">
                 <button type="button" data-align="left" title="Align left">⇤</button><button type="button" data-align="center-x" title="Horizontal center">↔</button><button type="button" data-align="right" title="Align right">⇥</button>
                 <button type="button" data-align="top" title="Align top">⇡</button><button type="button" data-align="center-y" title="Vertical center">↕</button><button type="button" data-align="bottom" title="Align bottom">⇣</button>
               </div>
-              <div class="property-row"><span>Align to</span><div class="fake-select">Selection <span>⌄</span></div></div>
+              <div class="property-row"><span>Align to</span><span class="muted">Selection bounds</span></div>
               <div class="icon-action-grid distribute-grid">
                 <button type="button" data-distribute="x" title="Distribute horizontal spacing">⇹</button><button type="button" data-distribute="y" title="Distribute vertical spacing">⇳</button><button type="button" data-distribute="x" title="Distribute horizontal spacing">☷</button>
               </div>
             </section>
 
             <section class="panel-section selection-properties" id="pathfinder-properties">
-              <div class="section-heading"><h3>Pathfinder</h3><button class="panel-more" type="button" title="More pathfinder options">···</button></div>
+              <div class="section-heading"><h3>Pathfinder</h3><button class="panel-more" type="button" title="More pathfinder options" disabled>···</button></div>
               <div class="icon-action-grid pathfinder-grid">
-                <button type="button" title="Unite">◧</button><button type="button" title="Minus front">◩</button><button type="button" title="Intersect">◪</button><button type="button" title="Exclude">▧</button>
+                <button type="button" title="Unite — Boolean path engine pending" disabled>◧</button><button type="button" title="Minus front — Boolean path engine pending" disabled>◩</button><button type="button" title="Intersect — Boolean path engine pending" disabled>◪</button><button type="button" title="Exclude — Boolean path engine pending" disabled>▧</button>
               </div>
             </section>
 
             <section class="panel-section selection-properties" id="color-properties">
-              <div class="section-heading"><h3>Color</h3><button class="panel-more" type="button" title="More color options">···</button></div>
+              <div class="section-heading"><h3>Color</h3><button class="panel-more" type="button" title="More color options" disabled>···</button></div>
               <div class="color-spectrum" aria-label="Color spectrum preview"></div>
-              <div class="property-row"><span>Color mode</span><div class="fake-select">RGB <span>⌄</span></div></div>
+              <div class="property-row"><span>Color mode</span><span class="muted">RGB · HEX input</span></div>
             </section>
 
             <section class="panel-section selection-properties" id="gradient-properties">
-              <div class="section-heading"><h3>Gradient</h3><button class="panel-more" type="button" title="More gradient options">···</button></div>
+              <div class="section-heading"><h3>Gradient</h3><button class="panel-more" type="button" title="More gradient options" disabled>···</button></div>
               <div class="gradient-preview"></div>
-              <div class="property-row"><span>Type</span><div class="fake-select">Linear <span>⌄</span></div></div>
+              <div class="property-row"><span>Type</span><span class="muted">Linear preview only</span></div>
               <div class="property-row"><span>Angle</span><input class="compact-number" type="text" value="0°" disabled /></div>
             </section>
 
@@ -253,7 +253,7 @@ function renderEditor() {
             </section>
 
             <section class="panel-section selection-properties" id="type-properties">
-              <div class="section-heading"><h3>Character &amp; Paragraph</h3><button class="panel-more" type="button" title="More typography options">···</button></div>
+              <div class="section-heading"><h3>Character &amp; Paragraph</h3><button class="panel-more" type="button" title="More typography options" disabled>···</button></div>
               <div class="fake-select type-family">Arial <span>⌄</span></div>
               <div class="transform-grid type-controls">
                 <label class="property-field"><span>Size</span><input type="text" value="12 pt" disabled /></label>
@@ -268,7 +268,7 @@ function renderEditor() {
               <div class="section-heading"><h3>Document</h3><span class="muted">Artboard 1</span></div>
               <div class="property-row"><label for="document-width">Width</label><input id="document-width" class="compact-number" type="number" min="1" max="100000" step="1" value="1280" /></div>
               <div class="property-row"><label for="document-height">Height</label><input id="document-height" class="compact-number" type="number" min="1" max="100000" step="1" value="800" /></div>
-              <div class="property-row"><span>Units</span><div class="fake-select">Pixels <span>⌄</span></div></div>
+              <div class="property-row"><span>Units</span><span class="muted">Pixels</span></div>
             </section>
 
             <section class="panel-section">
