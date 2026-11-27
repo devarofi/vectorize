@@ -186,6 +186,7 @@ function renderEditor() {
                 <label class="property-field"><span>H</span><input id="prop-height" data-transform="height" type="number" min="0" step="any" value="—" disabled /></label>
               </div>
               <div class="property-inline-row"><button type="button" class="mini-icon-button" title="Constrain proportions (not implemented)" disabled>↔</button><span class="muted">Constrain proportions</span><button type="button" class="mini-icon-button" title="More transform options (not implemented)" disabled>⌗</button></div>
+              <div class="property-row" id="corner-radius-row" hidden><label for="prop-corner-radius">Corner radius</label><input id="prop-corner-radius" class="compact-number" type="number" min="0" step="any" value="0" /></div>
             </section>
 
             <section class="panel-section selection-properties" id="appearance-properties">
@@ -450,6 +451,13 @@ function renderEditor() {
     store.patchSelectedStyle({ opacity: Math.max(0, Math.min(100, value)) / 100 });
     scheduleRender();
   });
+  document.querySelector('#prop-corner-radius').addEventListener('change', (event) => {
+    if (event.target.value.trim() === '') return;
+    const value = Number(event.target.value);
+    if (!Number.isFinite(value)) return;
+    store.setSelectedCornerRadius(Math.max(0, value));
+    scheduleRender();
+  });
   document.querySelector('#prop-stroke-width').addEventListener('change', (event) => {
     if (event.target.value.trim() === '') return;
     const value = Number(event.target.value);
@@ -600,6 +608,16 @@ function updatePanels() {
   document.querySelector('#document-properties').hidden = selected.length > 0;
   const hasSelection = selected.length > 0;
   const bounds = store.selectionBounds();
+  const cornerRow = document.querySelector('#corner-radius-row');
+  const canEditCorners = shapes.length > 0 && shapes.every((shape) => shape.kind === 'rect');
+  cornerRow.hidden = !canEditCorners;
+  if (canEditCorners) {
+    const radii = shapes.map((shape) => shape.geometry.rx || 0);
+    const sameRadius = radii.every((value) => value === radii[0]);
+    const radiusInput = document.querySelector('#prop-corner-radius');
+    radiusInput.disabled = !hasSelection;
+    if (document.activeElement !== radiusInput) radiusInput.value = sameRadius ? String(radii[0]) : '';
+  }
   const setField = (selector, value) => {
     const input = document.querySelector(selector);
     if (!input) return;
