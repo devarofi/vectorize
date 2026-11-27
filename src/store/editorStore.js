@@ -28,10 +28,22 @@ import { createViewport, fitViewport, panBy, zoomAt } from '../core/viewport.js'
 /* Reactive states                                                     */
 /* ------------------------------------------------------------------ */
 
-export const doc = stateOf(createDocument({ name: 'Vectorize Demo' }));
-export const selection = stateOf(/** @type {string[]} */ ([]));
+/**
+ * Jetz stateOf(object/array) exposes reactive properties on that object; it
+ * does not return a root State with .value/.peek/.setState. The editor treats
+ * document, selection and viewport as immutable snapshots, so hold each
+ * snapshot inside a State created from a primitive initial value instead.
+ */
+function snapshotState(initialValue) {
+  const state = stateOf(undefined);
+  state.setState(initialValue);
+  return state;
+}
+
+export const doc = snapshotState(createDocument({ name: 'Vectorize Demo' }));
+export const selection = snapshotState(/** @type {string[]} */ ([]));
 export const activeTool = stateOf('select'); // select | rect | ellipse | line | pen
-export const viewport = stateOf(createViewport());
+export const viewport = snapshotState(createViewport());
 export const gridSize = stateOf(0); // 0 disables snapping
 export const statusText = stateOf('Ready');
 
