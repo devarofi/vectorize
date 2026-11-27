@@ -463,8 +463,8 @@ export class InteractionController {
           if (g.kind === 'spiral') {
             const cx = b.x + b.width / 2, cy = b.y + b.height / 2;
             const points = Array.from({ length: 97 }, (_, index) => {
-              const t = index / 96, angle = -Math.PI / 2 + t * Math.PI * 6, radius = 2 + t * 0.48;
-              return { x: cx + Math.cos(angle) * b.width * 0.5 * t * radius, y: cy + Math.sin(angle) * b.height * 0.5 * t * radius };
+              const t = index / 96, angle = -Math.PI / 2 + t * Math.PI * 6;
+              return { x: cx + Math.cos(angle) * b.width * 0.5 * t, y: cy + Math.sin(angle) * b.height * 0.5 * t };
             });
             shape = createPath(points, { closed: false });
             shape.name = 'Spiral';
