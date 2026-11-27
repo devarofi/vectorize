@@ -113,9 +113,9 @@ The visible toolbar is grouped into logical sections. Implemented tools are wire
 
 ### Toolbar utilities
 - [x] Fill/stroke swatch visual
-- [ ] Swap fill/stroke
-- [ ] Default fill/stroke
-- [ ] None / color / gradient swatch controls
+- [x] Swap fill/stroke
+- [x] Default fill/stroke
+- [x] Set selected fill to None
 - [ ] Toolbar customization and tear-off tool groups
 - [ ] Tool flyouts and alternate-tool selection
 
@@ -125,7 +125,8 @@ The visible toolbar is grouped into logical sections. Implemented tools are wire
 - [x] Functional Properties / Layers / Assets tabs
 - [x] Selection summary and object-kind context label
 - [x] Document properties empty-selection state
-- [ ] Functional panel switching, collapse/expand and panel docking
+- [x] Functional panel switching
+- [ ] Collapse/expand and panel docking
 
 ### Transform
 - [x] X, Y, Width, Height fields reflect selected-object bounds
@@ -149,14 +150,17 @@ The visible toolbar is grouped into logical sections. Implemented tools are wire
 - [ ] Color models, swatch groups and color picker workflows
 - [ ] Multiple fills and strokes / Appearance stack
 - [ ] Opacity masks and transparency controls
-- [ ] Blend modes and isolation
+- [x] Blend modes
+- [ ] Isolation and opacity masks
 - [ ] Graphic styles and reusable appearances
 
 ### Stroke
 - [x] Stroke weight control (editable and undoable)
-- [x] Cap, join and profile controls (visual only)
+- [x] Editable cap and join controls
+- [~] Uniform stroke profile (fixed)
 - [ ] Stroke alignment: inside, center, outside
-- [ ] Dash arrays and dash offset
+- [x] Dash arrays
+- [ ] Dash offset
 - [ ] Arrowheads and endpoint markers
 - [ ] Variable-width profiles and width editing
 - [ ] Expand stroke
@@ -165,8 +169,9 @@ The visible toolbar is grouped into logical sections. Implemented tools are wire
 - [x] Functional align action grid
 - [x] Align-to target visual
 - [x] Distribution action visuals
-- [ ] Align to selection, key object, artboard and canvas
-- [ ] Distribute spacing with numeric gap
+- [x] Align to selection bounds
+- [ ] Align to key object, artboard and canvas
+- [x] Equal-gap distribution
 - [ ] Smart distribute
 
 ### Pathfinder and shape operations
@@ -176,7 +181,7 @@ The visible toolbar is grouped into logical sections. Implemented tools are wire
 - [ ] Shape Builder interactive regions
 
 ### Contextual object sections
-- [ ] Rectangle / rounded rectangle geometry
+- [~] Rectangle / rounded rectangle geometry (X/Y/W/H and uniform radius)
 - [ ] Ellipse geometry
 - [ ] Line endpoints and angle
 - [ ] Path anchors, handles, segments and closure
@@ -195,7 +200,7 @@ The right panel combines functional selection-aware Transform and Appearance con
 - [x] Functional Assets tab (primitive presets)
 - [x] Selection summary and selected-object kind label
 - [x] Empty-selection / document-properties state
-- [ ] Functional tab switching and active-tab persistence
+- [x] Functional tab switching
 - [ ] Collapse/expand sections and panel resizing
 - [ ] Panel docking, undocking and workspace presets
 - [~] Multi-selection summary and mixed-value display (selection count, aggregate bounds and mixed appearance labels)
@@ -231,7 +236,8 @@ The right panel combines functional selection-aware Transform and Appearance con
 - [x] Gradient preview
 - [ ] Fill color picker with HEX, RGB, HSL and alpha
 - [~] Fill type: solid, linear and radial gradient; freeform and pattern pending
-- [ ] Stroke color picker and stroke enable/disable
+- [x] Stroke color picker
+- [ ] Stroke enable/disable toggle
 - [ ] Multiple fills and multiple strokes
 - [ ] Appearance stack: add, remove, reorder and duplicate appearance entries
 - [ ] Per-appearance opacity and blend mode
@@ -268,7 +274,7 @@ The right panel combines functional selection-aware Transform and Appearance con
 - [ ] Align to pixel grid
 
 ### Pathfinder and geometry operations
-- [x] Unite, Minus Front, Intersect and Exclude button visuals
+- [x] Pathfinder actions are visibly disabled pending a Boolean engine
 - [ ] Unite (requires robust closed-path Boolean engine)
 - [ ] Minus Front / subtract (requires robust closed-path Boolean engine)
 - [ ] Intersect (requires robust closed-path Boolean engine)
@@ -572,15 +578,13 @@ This is the per-button inventory for the current left toolbar. A visible button 
 ## 8. Suggested implementation sequence
 
 1. [x] Establish Illustrator-inspired toolbar and Properties panel visual hierarchy.
-2. [ ] Make panel state and selection context fully data-driven.
-3. [ ] Complete document model and transaction/history correctness.
+2. [~] Finish the remaining feasible toolbar and Properties controls (transform tools, contextual shape values, gradient stops, color inputs).
+3. [ ] Complete additional file workflows, SVG import, export options and autosave.
 4. [ ] Implement Bézier paths, Direct Selection and anchor editing.
-5. [ ] Complete transform, stroke, fill and appearance stack.
-6. [ ] Implement layers, groups, ordering and pathfinder operations.
-7. [ ] Add typography, gradients, patterns, symbols and artboards.
-8. [ ] Add native save/open, import/export and autosave.
-9. [ ] Add snapping, guides, accessibility and responsive customization.
-10. [ ] Stabilize with automated tests and performance benchmarks.
+5. [ ] Add groups, Boolean path operations and richer layer management.
+6. [ ] Add typography, patterns, symbols, graph objects and multiple artboards.
+7. [ ] Add snapping, guides, accessibility and workspace customization.
+8. [ ] Stabilize with automated tests, browser interaction tests and performance benchmarks.
 
 ## 9. Current implementation notes
 
