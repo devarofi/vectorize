@@ -34,7 +34,7 @@ vectorize/
         └── geometry.js
 ```
 
-No application entry point, HTML shell, stylesheet, UI component tree, exporter, importer, persistence adapter, or test suite was present in the inspected tree.
+The initial application shell has since been added: root `index.html`, a small History API router (`/` and `/editor`), a Jetz-backed editor bootstrap, and a stylesheet. The shell wires the existing SVG renderer and interaction controller. Import/export, persistence, a complete panel system, and automated test coverage are still absent.
 
 ## 3. Existing architectural layers
 
