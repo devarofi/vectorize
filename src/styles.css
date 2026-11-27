@@ -55,3 +55,37 @@ kbd { padding: 2px 5px; border: 1px solid #3b475b; border-radius: 4px; color: #c
   .workspace { grid-template-columns: 54px minmax(300px, 1fr) 210px; }
   .inspector .panel-section { padding: 14px 12px; }
 }
+
+
+/* Drawing previews are screen-space SVG overlays; keep them visibly above artwork. */
+.ghost {
+  pointer-events: none;
+  fill: rgba(79, 142, 247, .18);
+  stroke: #60a5fa;
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+  vector-effect: non-scaling-stroke;
+}
+.pen-preview {
+  pointer-events: none;
+  fill: none;
+  stroke: #38bdf8;
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.pen-anchor {
+  fill: #f8fafc;
+  stroke: #0284c7;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.pen-cursor {
+  pointer-events: none;
+  fill: #38bdf8;
+  stroke: #f8fafc;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
