@@ -145,6 +145,10 @@ export class SvgRenderer {
       stroke: s.stroke || 'none',
       'stroke-width': s.stroke ? fmt(s.strokeWidth) : '0',
       opacity: fmt(s.opacity),
+      'stroke-linecap': s.strokeLinecap || 'butt',
+      'stroke-linejoin': s.strokeLinejoin || 'miter',
+      'stroke-dasharray': s.strokeDasharray || 'none',
+      style: s.blendMode && s.blendMode !== 'normal' ? `mix-blend-mode:${s.blendMode}` : '',
     };
   }
 
@@ -152,7 +156,7 @@ export class SvgRenderer {
     const g = shape.geometry;
     switch (shape.kind) {
       case 'rect':
-        return { x: fmt(g.x), y: fmt(g.y), width: fmt(g.width), height: fmt(g.height) };
+        return { x: fmt(g.x), y: fmt(g.y), width: fmt(g.width), height: fmt(g.height), rx: fmt(g.rx || 0), ry: fmt(g.ry || 0) };
       case 'ellipse':
         return { cx: fmt(g.cx), cy: fmt(g.cy), rx: fmt(g.rx), ry: fmt(g.ry) };
       case 'line':
