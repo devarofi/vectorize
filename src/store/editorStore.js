@@ -308,6 +308,11 @@ export function toggleLayerVisible(layerId) {
     const layer = draft.layers.find((l) => l.id === layerId);
     if (layer) layer.visible = !layer.visible;
   });
+  const updatedLayer = doc.peek().layers.find((layer) => layer.id === layerId);
+  if (updatedLayer && !updatedLayer.visible) {
+    const hiddenIds = new Set(updatedLayer.shapes.map((shape) => shape.id));
+    selection.value = selection.peek().filter((id) => !hiddenIds.has(id));
+  }
   const active = doc.peek().layers.find((layer) => layer.id === activeLayerId.peek());
   if (!active?.visible) activeLayerId.value = doc.peek().layers.find((layer) => layer.visible)?.id || null;
 }
@@ -342,7 +347,7 @@ export function deleteEmptyLayer(id) {
   const layer = doc.peek().layers.find((item) => item.id === id);
   if (!layer || layer.shapes.length) return;
   transact('Delete layer', (draft) => { draft.layers = draft.layers.filter((item) => item.id !== id); });
-  if (activeLayerId.peek() === id) activeLayerId.value = doc.peek().layers.at(-1)?.id || null;
+  if (activeLayerId.peek() === id) activeLayerId.value = doc.peek().layers.find((item) => item.visible)?.id || null;
 }
 export function setDocumentSize(width, height) {
   const w = Math.max(1, Math.min(100000, Number(width)));
