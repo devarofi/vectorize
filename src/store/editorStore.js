@@ -56,6 +56,9 @@ export const resizePreview = stateOf(/** @type {null|{ids:string[],startBox:Obje
 /** True while a pan/zoom gesture is running so panels can skip updates. */
 export const isGesturing = stateOf(false);
 
+/** Reactive revision counter so computed history availability observes stack changes. */
+const historyRevision = stateOf(0);
+
 const history = new HistoryManager({ limit: 120 });
 export { history };
 
@@ -82,8 +85,8 @@ export const objectCount = computed(() =>
   doc.value.layers.reduce((n, l) => n + l.shapes.length, 0)
 );
 
-export const canUndo = computed(() => history.undoStack.length > 0 && history.undoStack[history.undoStack.length - 1] !== undefined);
-export const canRedo = computed(() => history.redoStack.length > 0);
+export const canUndo = computed(() => historyRevision.value >= 0 && history.canUndo);
+export const canRedo = computed(() => historyRevision.value >= 0 && history.canRedo);
 
 /* ------------------------------------------------------------------ */
 /* Document mutation API (all history-tracked)                         */
@@ -101,7 +104,10 @@ function commitDoc(next) {
  */
 export function transact(label, mutate) {
   const command = produceCommand(label, doc.peek(), mutate, commitDoc);
-  history.execute(command);
+  // produceCommand already commits the after-snapshot; record it without
+  // executing command.do() a second time.
+  history.record(command);
+  historyRevision.value += 1;
   return command;
 }
 
@@ -184,6 +190,32 @@ export function applyBoxToShape(shape, box) {
       break;
     }
   }
+}
+
+/**
+ * Resize/reposition the complete selection by editing its aggregate bounds.
+ * Every selected shape keeps its relative position and proportions.
+ */
+export function setSelectionBounds(target) {
+  const shapes = getSelectedShapes();
+  const source = boundsOf(shapes);
+  if (!source || !shapes.length) return;
+  const sx = source.width === 0 ? 1 : target.width / source.width;
+  const sy = source.height === 0 ? 1 : target.height / source.height;
+  const ids = selection.peek();
+  transact('Transform selection', (draft) => {
+    for (const id of ids) {
+      const found = findShape(draft, id);
+      if (!found) continue;
+      const box = shapeBounds(found.shape);
+      applyBoxToShape(found.shape, {
+        x: target.x + (box.x - source.x) * sx,
+        y: target.y + (box.y - source.y) * sy,
+        width: box.width * sx,
+        height: box.height * sy,
+      });
+    }
+  });
 }
 
 /* ------------------------------------------------------------------ */
@@ -326,6 +358,7 @@ export function endTransformGesture(mutateFinal) {
     makeRestoreCommand('Transform', before, after)
   );
   commitDoc(after);
+  historyRevision.value += 1;
 }
 
 function makeRestoreCommand(label, before, after) {
@@ -343,6 +376,7 @@ function makeRestoreCommand(label, before, after) {
 export function undo() {
   batch(() => {
     const cmd = history.undo();
+    if (cmd) historyRevision.value += 1;
     statusText.value = cmd ? `Undo: ${cmd.label}` : 'Nothing to undo';
   });
 }
@@ -350,6 +384,7 @@ export function undo() {
 export function redo() {
   batch(() => {
     const cmd = history.redo();
+    if (cmd) historyRevision.value += 1;
     statusText.value = cmd ? `Redo: ${cmd.label}` : 'Nothing to redo';
   });
 }
