@@ -5,7 +5,7 @@ A browser-based vector graphics editor built with JavaScript, SVG, and Jetz.
 ## Requirements
 
 - Node.js 20 or newer
-- pnpm 9 or newer
+- pnpm 9.15.9 (pinned through `packageManager`)
 
 ## Run locally
 
@@ -26,7 +26,7 @@ Vite's SPA fallback supports refreshing or directly opening `/editor`.
 The repository includes `vercel.json` configured for Vite:
 
 - Framework: Vite
-- Install command: `npm install --no-package-lock` (avoids relying on the legacy, stale npm lockfile)
+- Install command: `pnpm install --no-frozen-lockfile` (uses pnpm; allows the first deployment before `pnpm-lock.yaml` is committed)
 - Build command: `npm run build`
 - Output directory: `dist`
 - SPA rewrite: unknown application paths are served through `index.html`, so `/editor` works on direct navigation and refresh.
