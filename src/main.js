@@ -606,8 +606,12 @@ function updatePanels() {
   setSelect('#prop-linejoin', 'strokeLinejoin', 'miter');
   setSelect('#prop-blend', 'blendMode', 'normal');
   setField('#prop-dash', uniform('strokeDasharray') === '__mixed__' ? '' : uniform('strokeDasharray') || '');
-  document.querySelector('#document-width').value = String(store.doc.peek().width);
-  document.querySelector('#document-height').value = String(store.doc.peek().height);
+  if (document.activeElement !== document.querySelector('#document-width')) {
+    document.querySelector('#document-width').value = String(store.doc.peek().width);
+  }
+  if (document.activeElement !== document.querySelector('#document-height')) {
+    document.querySelector('#document-height').value = String(store.doc.peek().height);
+  }
   document.querySelectorAll('[data-transform]').forEach((input) => { input.disabled = !hasSelection; });
   document.querySelectorAll('[data-tool]').forEach((button) => {
     button.classList.toggle('active', button.dataset.tool === store.activeTool.peek());
