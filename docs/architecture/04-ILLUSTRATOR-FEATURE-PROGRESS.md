@@ -149,7 +149,8 @@ The visible toolbar is grouped into logical sections. Only the already implement
 - [ ] Graphic styles and reusable appearances
 
 ### Stroke
-- [x] Weight, cap, join and profile controls (visual only)
+- [x] Stroke weight control (editable and undoable)
+- [x] Cap, join and profile controls (visual only)
 - [ ] Stroke alignment: inside, center, outside
 - [ ] Dash arrays and dash offset
 - [ ] Arrowheads and endpoint markers
@@ -182,7 +183,7 @@ The visible toolbar is grouped into logical sections. Only the already implement
 
 ## 3A. Complete Properties-panel inventory
 
-The current right panel is a visual scaffold. The checklist below tracks both the visible controls and the full behavior expected from a professional contextual inspector.
+The right panel combines functional selection-aware Transform and Appearance controls with visual-only placeholders. The checklist below tracks both implemented behavior and the remaining professional inspector surface.
 
 ### Panel navigation and context
 - [x] Properties tab visual
@@ -193,7 +194,7 @@ The current right panel is a visual scaffold. The checklist below tracks both th
 - [ ] Functional tab switching and active-tab persistence
 - [ ] Collapse/expand sections and panel resizing
 - [ ] Panel docking, undocking and workspace presets
-- [ ] Multi-selection summary and mixed-value display
+- [~] Multi-selection summary and mixed-value display (selection count, aggregate bounds and mixed appearance labels)
 - [ ] Context-sensitive sections per object type
 - [ ] Reset section values and restore defaults
 
