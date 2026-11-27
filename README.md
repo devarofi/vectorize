@@ -26,8 +26,8 @@ Vite's SPA fallback supports refreshing or directly opening `/editor`.
 The repository includes `vercel.json` configured for Vite:
 
 - Framework: Vite
-- Install command: `pnpm install` (uses pnpm; allows the first deployment before `pnpm-lock.yaml` is committed)
-- Build command: `npm run build`
+- Install command: `npx --yes pnpm@9.15.9 install --no-frozen-lockfile` (pins the pnpm executable for the initial install)
+- Build command: `pnpm run build`
 - Output directory: `dist`
 - SPA rewrite: unknown application paths are served through `index.html`, so `/editor` works on direct navigation and refresh.
 
@@ -35,7 +35,7 @@ To deploy:
 
 1. Import `devarofi/vectorize` in the [Vercel Dashboard](https://vercel.com/new).
 2. Keep the project root as the repository root; the build and output settings are read from `vercel.json`.
-3. Set the Node.js version to 20 or newer in Project Settings if it is not detected automatically.
+3. Use Node.js 22.x in Project Settings; `package.json` also pins the build runtime to `22.x`.
 4. Deploy. Subsequent pushes to `main` will trigger production deployments when the repository is connected to Vercel.
 
 Before the first deployment, generate and commit `pnpm-lock.yaml` by running `pnpm install` locally. Once the lockfile is committed, change the Vercel install command to `pnpm install --frozen-lockfile` (or remove the override and let Vercel detect pnpm from `pnpm-lock.yaml`). No application environment variables are currently required by the frontend shell.
