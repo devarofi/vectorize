@@ -12,7 +12,7 @@ The repository contains a promising editor foundation:
 - SVG keyed renderer.
 - Pointer/keyboard interaction controller.
 
-It is not yet a complete web application. The inspected repository has no visible app bootstrap, HTML entry point, stylesheet, UI panels, import/export implementation, persistence layer, or meaningful test command.
+The initial web application shell is now present (`index.html`, `/` and `/editor` routes, Vite scripts, editor bootstrap, and base stylesheet). It is runnable after dependency installation, but remains a minimal shell rather than a complete editor product. Import/export, persistence, a full panel system, and meaningful automated tests are still absent.
 
 **Recommendation:** stabilize and test the existing foundation before adding advanced Illustrator-like features.
 
@@ -160,11 +160,11 @@ Recommended fix:
 
 ### P2 — Product readiness and maintainability
 
-#### L. No application shell or user-facing editor UI is present in the inspected tree
-The repository currently exposes engine/store modules but no visible entry point, toolbar, layers panel, inspector, menus, or document workspace.
+#### L. Initial application shell exists; full editor UI remains incomplete
+The repository now has an HTML entry point, `/` and `/editor` routes, a Vite development server, a toolbar, canvas workspace, basic properties area, and initial layer display. This is enough to launch the current engine, but it is not yet a complete or polished editor shell.
 
 Recommended next step:
-- Build a minimal but complete editor shell before adding many tools.
+- Expand the initial shell into complete, accessible menu, layers, and inspector workflows.
 - Keep UI components thin and bind them to Jetz state/commands.
 
 #### M. Import/export and persistence are absent
@@ -177,14 +177,13 @@ Recommended order:
 4. Browser autosave/recovery.
 5. Additional formats (PNG/PDF) after the document model stabilizes.
 
-#### N. Package metadata and developer workflow are incomplete
-`package.json` is named `workspace`, has an empty description, an `index.js` main entry that is not present in the inspected tree, ISC package metadata while the repository contains an MIT license, and a placeholder test script.
+#### N. Package workflow is only partially established
+`package.json` now has product metadata, ESM mode, Vite start/dev/build/preview scripts, a Node test-runner command, and a Node 20+ requirement. A pnpm lockfile and actual automated tests still need to be generated/added; lint and format scripts are also not configured.
 
 Recommended fix:
-- Give the package a product-specific name and description.
-- Align package license metadata with the repository license.
-- Define dev, build, lint, format, and test scripts when the app shell is introduced.
-- Document supported Node version and local setup.
+- Run `pnpm install` and commit the generated `pnpm-lock.yaml`.
+- Add meaningful tests and lint/format scripts as Phase 0 stabilizes the core.
+- Keep local setup instructions current in README.
 
 ## 3. Positive design decisions
 
