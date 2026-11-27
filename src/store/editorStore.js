@@ -23,6 +23,7 @@ import {
 } from '../core/document.js';
 import { HistoryManager, produceCommand } from '../core/history.js';
 import { createViewport, fitViewport, panBy, zoomAt } from '../core/viewport.js';
+import { nextId } from '../core/id.js';
 
 /* ------------------------------------------------------------------ */
 /* Reactive states                                                     */
@@ -318,7 +319,7 @@ export function toggleShapeVisible(shapeId) {
 }
 
 export function addLayer(name) {
-  const id = `layer_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+  const id = nextId('layer');
   transact('Add layer', (draft) => {
     draft.layers.push({ id, name: name || `Layer ${draft.layers.length + 1}`, visible: true, shapes: [] });
   });
@@ -419,7 +420,7 @@ export function duplicateSelected() {
       const originals = layer.shapes.filter((shape) => ids.includes(shape.id));
       for (const original of originals) {
         const copy = cloneDocument(original);
-        copy.id = `${original.id}_copy_${Date.now().toString(36)}_${copies.length}`;
+        copy.id = nextId('copy');
         copy.name = `${original.name} copy`;
         translateShape(copy, 12, 12);
         layer.shapes.splice(layer.shapes.indexOf(original) + 1, 0, copy);
