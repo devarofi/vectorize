@@ -60,7 +60,10 @@ function renderEditor() {
             ${toolButton('〰', 'Smooth Tool')}
             ${toolButton('⌫', 'Path Eraser Tool')}
             ${toolButton('⊣', 'Join Tool')}
-            ${toolButton('⌃', 'Anchor Point Tool', 'Shift+C')}
+            ${toolButton('⌃', 'Anchor Point Tool')}
+            ${toolButton('+', 'Add Anchor Point Tool')}
+            ${toolButton('−', 'Delete Anchor Point Tool')}
+            ${toolButton('⌜', 'Convert Anchor Point Tool')}
           </div>
           <div class="tool-divider"></div>
           <div class="tool-group" aria-label="Type tools">
@@ -68,6 +71,7 @@ function renderEditor() {
             ${toolButton('▤', 'Area Type Tool')}
             ${toolButton('T↝', 'Type on a Path Tool')}
             ${toolButton('T↕', 'Vertical Type Tool')}
+            ${toolButton('T✥', 'Touch Type Tool')}
           </div>
           <div class="tool-divider"></div>
           <div class="tool-group" aria-label="Shape tools">
@@ -81,6 +85,7 @@ function renderEditor() {
             ${toolButton('◎', 'Spiral Tool')}
             ${toolButton('▦', 'Rectangular Grid Tool')}
             ${toolButton('▧', 'Polar Grid Tool')}
+            ${toolButton('☼', 'Flare Tool')}
           </div>
           <div class="tool-divider"></div>
           <div class="tool-group" aria-label="Paint and color tools">
@@ -101,20 +106,48 @@ function renderEditor() {
             ${toolButton('⬡', 'Shape Builder Tool', 'Shift+M')}
             ${toolButton('⤢', 'Free Transform Tool', 'E')}
             ${toolButton('⟳', 'Rotate Tool', 'R')}
-            ${toolButton('⇱', 'Reflect Tool', 'O')}
+            ${toolButton('⇱', 'Reflect Tool')}
+            ${toolButton('⤡', 'Scale Tool')}
+            ${toolButton('⤧', 'Shear Tool')}
+            ${toolButton('⌁', 'Reshape Tool')}
+            ${toolButton('〰', 'Warp Tool')}
+            ${toolButton('↝', 'Twirl Tool')}
+            ${toolButton('⊙', 'Pucker Tool')}
+            ${toolButton('⊚', 'Bloat Tool')}
+            ${toolButton('✺', 'Scallop Tool')}
+            ${toolButton('✣', 'Crystallize Tool')}
+            ${toolButton('≋', 'Wrinkle Tool')}
           </div>
           <div class="tool-divider"></div>
           <div class="tool-group" aria-label="Symbol and graph tools">
-            ${toolButton('✺', 'Symbol Sprayer Tool', 'Shift+S')}
-            ${toolButton('▥', 'Column Graph Tool', 'J')}
+            ${toolButton('✺', 'Symbol Sprayer Tool')}
+            ${toolButton('⇢', 'Symbol Shifter Tool')}
+            ${toolButton('≋', 'Symbol Scruncher Tool')}
+            ${toolButton('⊕', 'Symbol Sizer Tool')}
+            ${toolButton('⟳', 'Symbol Spinner Tool')}
+            ${toolButton('◒', 'Symbol Stainer Tool')}
+            ${toolButton('◐', 'Symbol Screener Tool')}
+            ${toolButton('✧', 'Symbol Styler Tool')}
+            ${toolButton('▥', 'Column Graph Tool')}
+            ${toolButton('▤', 'Stacked Column Graph Tool')}
             ${toolButton('▤', 'Bar Graph Tool')}
+            ${toolButton('▥', 'Stacked Bar Graph Tool')}
+            ${toolButton('⌁', 'Line Graph Tool')}
+            ${toolButton('▧', 'Area Graph Tool')}
+            ${toolButton('⁙', 'Scatter Graph Tool')}
             ${toolButton('◔', 'Pie Graph Tool')}
-            ${toolButton('⌖', 'Artboard Tool', 'Shift+O')}
+            ${toolButton('◎', 'Radar Graph Tool')}
+            ${toolButton('⌖', 'Artboard Tool')}
           </div>
           <div class="tool-divider"></div>
           <div class="tool-group" aria-label="Navigation tools">
             ${toolButton('✋', 'Hand Tool')}
             ${toolButton('⌕', 'Zoom Tool')}
+            ${toolButton('▤', 'Slice Tool')}
+            ${toolButton('▥', 'Slice Selection Tool')}
+            ${toolButton('⊹', 'Measure Tool')}
+            ${toolButton('▦', 'Perspective Grid Tool')}
+            ${toolButton('⌖', 'Perspective Selection Tool')}
           </div>
           <div class="tool-footer">
             <button type="button" class="color-swatch-button" title="Fill and stroke swatches"><span class="swatch-fill"></span><span class="swatch-stroke"></span></button>
@@ -191,6 +224,38 @@ function renderEditor() {
               <div class="icon-action-grid pathfinder-grid">
                 <button type="button" title="Unite">◧</button><button type="button" title="Minus front">◩</button><button type="button" title="Intersect">◪</button><button type="button" title="Exclude">▧</button>
               </div>
+            </section>
+
+            <section class="panel-section selection-properties" id="color-properties">
+              <div class="section-heading"><h3>Color</h3><button class="panel-more" type="button" title="More color options">···</button></div>
+              <div class="color-spectrum" aria-label="Color spectrum preview"></div>
+              <div class="property-row"><span>Color mode</span><div class="fake-select">RGB <span>⌄</span></div></div>
+            </section>
+
+            <section class="panel-section selection-properties" id="gradient-properties">
+              <div class="section-heading"><h3>Gradient</h3><button class="panel-more" type="button" title="More gradient options">···</button></div>
+              <div class="gradient-preview"></div>
+              <div class="property-row"><span>Type</span><div class="fake-select">Linear <span>⌄</span></div></div>
+              <div class="property-row"><span>Angle</span><input class="compact-number" type="text" value="0°" disabled /></div>
+            </section>
+
+            <section class="panel-section selection-properties" id="transparency-properties">
+              <div class="section-heading"><h3>Transparency</h3></div>
+              <div class="property-row"><span>Opacity</span><input class="compact-number" type="text" value="100%" disabled /></div>
+              <div class="property-row"><span>Blend mode</span><div class="fake-select">Normal <span>⌄</span></div></div>
+              <div class="property-row"><span>Isolate blending</span><span class="muted">Off</span></div>
+            </section>
+
+            <section class="panel-section selection-properties" id="type-properties">
+              <div class="section-heading"><h3>Character &amp; Paragraph</h3><button class="panel-more" type="button" title="More typography options">···</button></div>
+              <div class="fake-select type-family">Arial <span>⌄</span></div>
+              <div class="transform-grid type-controls">
+                <label class="property-field"><span>Size</span><input type="text" value="12 pt" disabled /></label>
+                <label class="property-field"><span>Leading</span><input type="text" value="Auto" disabled /></label>
+                <label class="property-field"><span>Tracking</span><input type="text" value="0" disabled /></label>
+                <label class="property-field"><span>Kerning</span><input type="text" value="Auto" disabled /></label>
+              </div>
+              <div class="icon-action-grid"><button type="button" title="Align left">☰</button><button type="button" title="Align center">≡</button><button type="button" title="Align right">☷</button></div>
             </section>
 
             <section class="panel-section document-properties" id="document-properties">
@@ -277,6 +342,10 @@ function updatePanels() {
   document.querySelector('#stroke-properties').hidden = selected.length === 0;
   document.querySelector('#align-properties').hidden = selected.length === 0;
   document.querySelector('#pathfinder-properties').hidden = selected.length === 0;
+  document.querySelector('#color-properties').hidden = selected.length === 0;
+  document.querySelector('#gradient-properties').hidden = selected.length === 0;
+  document.querySelector('#transparency-properties').hidden = selected.length === 0;
+  document.querySelector('#type-properties').hidden = selected.length === 0 || shapes[0]?.kind !== 'text';
   document.querySelector('#document-properties').hidden = selected.length > 0;
   document.querySelector('#fill-color').disabled = selected.length === 0;
   document.querySelectorAll('[data-tool]').forEach((button) => {
