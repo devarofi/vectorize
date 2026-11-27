@@ -20,6 +20,7 @@ import {
   findShape,
   shapeBounds,
   boundsOf,
+  validateDocument,
 } from '../core/document.js';
 import { HistoryManager, produceCommand } from '../core/history.js';
 import { createViewport, fitViewport, panBy, zoomAt } from '../core/viewport.js';
@@ -476,7 +477,7 @@ export function replaceDocument(nextDocument) {
     throw new TypeError('Invalid Vectorize document');
   }
   batch(() => {
-    doc.setState(cloneDocument(nextDocument));
+    doc.setState(validateDocument(nextDocument));
     activeLayerId.value = doc.peek().layers.find((layer) => layer.visible)?.id || null;
     selection.value = [];
     history.clear();
