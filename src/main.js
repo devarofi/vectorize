@@ -353,7 +353,7 @@ function renderEditor() {
       const name = button.dataset.menu;
       const items = menuItems[name] || [];
       menuPopover.innerHTML = items.map(([label, command]) =>
-        `<button type="button" class="menu-item" data-command="${command}">${escapeHtml(label)}</button>`
+        `<button type="button" class="menu-item" data-command="${command}" ${command === 'noop' || command === 'unsupported-type' ? 'disabled' : ''}>${escapeHtml(label)}</button>`
       ).join('');
       menuPopover.hidden = false;
       menuPopover.style.left = `${button.offsetLeft}px`;
@@ -607,7 +607,7 @@ function exportSvg(doc) {
     const s = shape.style || {};
     const paint = `fill="${escapeHtml(s.fill || 'none')}" stroke="${escapeHtml(s.stroke || 'none')}" stroke-width="${Number(s.strokeWidth) || 0}" opacity="${Number.isFinite(s.opacity) ? s.opacity : 1}"`;
     const g = shape.geometry;
-    if (shape.kind === 'rect') return `<rect x="${g.x}" y="${g.y}" width="${g.width}" height="${g.height}" ${paint}/>`;
+    if (shape.kind === 'rect') return `<rect x="${g.x}" y="${g.y}" width="${g.width}" height="${g.height}" rx="${g.rx || 0}" ry="${g.ry || 0}" ${paint}/>`;
     if (shape.kind === 'ellipse') return `<ellipse cx="${g.cx}" cy="${g.cy}" rx="${g.rx}" ry="${g.ry}" ${paint}/>`;
     if (shape.kind === 'line') return `<line x1="${g.points[0].x}" y1="${g.points[0].y}" x2="${g.points[1].x}" y2="${g.points[1].y}" ${paint}/>`;
     if (shape.kind === 'path') {
