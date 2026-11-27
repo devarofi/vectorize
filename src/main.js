@@ -240,9 +240,9 @@ function renderEditor() {
 
             <section class="panel-section selection-properties" id="gradient-properties">
               <div class="section-heading"><h3>Gradient</h3><button class="panel-more" type="button" title="More gradient options" disabled>···</button></div>
-              <div class="gradient-preview"></div>
-              <div class="property-row"><span>Type</span><span class="muted">Linear preview only</span></div>
-              <div class="property-row"><span>Angle</span><input class="compact-number" type="text" value="0°" disabled /></div>
+              <div class="gradient-preview" id="gradient-preview"></div>
+              <div class="property-row"><label for="prop-gradient-type">Type</label><select id="prop-gradient-type" class="compact-select"><option value="solid">Solid</option><option value="linear">Linear</option><option value="radial">Radial</option><option value="mixed" disabled>Mixed</option></select></div>
+              <div class="property-row"><label for="prop-gradient-angle">Angle</label><input id="prop-gradient-angle" class="compact-number" type="number" min="-360" max="360" step="1" value="0" /></div>
             </section>
 
             <section class="panel-section selection-properties" id="transparency-properties">
@@ -428,7 +428,15 @@ function renderEditor() {
   // Inspector edits are committed on change (not every keystroke), so each
   // edit produces one clean Undo/Redo entry.
   document.querySelector('#fill-color').addEventListener('change', (event) => {
-    store.patchSelectedStyle({ fill: event.target.value });
+    const first = store.getSelectedShapes()[0];
+    if (first?.style.fillGradient) {
+      const stops = first.style.fillGradient.stops.map((stop, index) =>
+        index === 0 ? { ...stop, color: event.target.value } : stop
+      );
+      store.patchSelectedStyle({ fill: event.target.value, fillGradient: { ...first.style.fillGradient, stops } });
+    } else {
+      store.patchSelectedStyle({ fill: event.target.value });
+    }
     scheduleRender();
   });
   document.querySelector('#stroke-color').addEventListener('change', (event) => {
@@ -455,6 +463,34 @@ function renderEditor() {
       scheduleRender();
     });
   }
+  document.querySelector('#prop-gradient-type').addEventListener('change', (event) => {
+    const type = event.target.value;
+    if (type === 'solid') {
+      store.patchSelectedStyle({ fillGradient: null });
+    } else {
+      const first = store.getSelectedShapes()[0];
+      const current = first?.style.fillGradient;
+      const stops = current?.stops || [
+        { offset: 0, color: first?.style.fill || '#4f8ef7', opacity: 1 },
+        { offset: 1, color: '#ffffff', opacity: 1 },
+      ];
+      store.patchSelectedStyle({ fillGradient: { type, angle: current?.angle || 0, stops } });
+    }
+    scheduleRender();
+  });
+  document.querySelector('#prop-gradient-angle').addEventListener('change', (event) => {
+    if (event.target.value.trim() === '') return;
+    const angle = Math.max(-360, Math.min(360, Number(event.target.value)));
+    if (!Number.isFinite(angle)) return;
+    const first = store.getSelectedShapes()[0];
+    const current = first?.style.fillGradient;
+    const stops = current?.stops || [
+      { offset: 0, color: first?.style.fill || '#4f8ef7', opacity: 1 },
+      { offset: 1, color: '#ffffff', opacity: 1 },
+    ];
+    store.patchSelectedStyle({ fillGradient: { type: current?.type || 'linear', angle, stops } });
+    scheduleRender();
+  });
   document.querySelector('#prop-dash').addEventListener('change', (event) => {
     const value = event.target.value.trim().replace(/[^0-9., ]/g, '').replace(/,/g, ' ');
     store.patchSelectedStyle({ strokeDasharray: value || null });
@@ -605,6 +641,20 @@ function updatePanels() {
   setSelect('#prop-linecap', 'strokeLinecap', 'butt');
   setSelect('#prop-linejoin', 'strokeLinejoin', 'miter');
   setSelect('#prop-blend', 'blendMode', 'normal');
+  const gradients = shapes.map((shape) => shape.style?.fillGradient || null);
+  const firstGradient = gradients[0] || null;
+  const sameGradient = gradients.every((gradient) => JSON.stringify(gradient) === JSON.stringify(firstGradient));
+  const gradientType = !sameGradient ? 'mixed' : firstGradient?.type || 'solid';
+  const gradientTypeInput = document.querySelector('#prop-gradient-type');
+  gradientTypeInput.disabled = !hasSelection;
+  gradientTypeInput.value = gradientType;
+  const gradientAngle = document.querySelector('#prop-gradient-angle');
+  gradientAngle.disabled = !hasSelection || gradientType === 'solid';
+  if (document.activeElement !== gradientAngle) gradientAngle.value = String(firstGradient?.angle || 0);
+  const gradientPreview = document.querySelector('#gradient-preview');
+  gradientPreview.style.background = gradientType === 'radial'
+    ? `radial-gradient(circle, ${firstGradient?.stops?.map((stop) => stop.color).join(', ') || '#4f8ef7, #ffffff'})`
+    : `linear-gradient(${firstGradient?.angle || 0}deg, ${firstGradient?.stops?.map((stop) => stop.color).join(', ') || '#4f8ef7, #ffffff'})`;
   setField('#prop-dash', uniform('strokeDasharray') === '__mixed__' ? '' : uniform('strokeDasharray') || '');
   if (document.activeElement !== document.querySelector('#document-width')) {
     document.querySelector('#document-width').value = String(store.doc.peek().width);
