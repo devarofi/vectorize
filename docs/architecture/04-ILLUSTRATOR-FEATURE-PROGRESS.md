@@ -51,13 +51,14 @@ The visible toolbar is grouped into logical sections. Only the already implement
 - [ ] Smooth tool
 - [ ] Path Eraser tool
 - [ ] Join tool
-- [ ] Anchor Point tool (convert/add/remove handles)
+- [ ] Anchor Point tool, Add Anchor Point, Delete Anchor Point, Convert Anchor Point
 
 ### Type tools
 - [ ] Type tool
 - [ ] Area Type tool
 - [ ] Type on a Path tool
 - [ ] Vertical Type tool
+- [ ] Touch Type tool
 - [ ] Touch Type tool
 - [ ] Font browser, paragraph and character controls
 
@@ -72,6 +73,7 @@ The visible toolbar is grouped into logical sections. Only the already implement
 - [ ] Spiral tool
 - [ ] Rectangular Grid tool
 - [ ] Polar Grid tool
+- [ ] Flare tool
 
 ### Paint and color tools
 - [ ] Paintbrush tool
@@ -94,11 +96,15 @@ The visible toolbar is grouped into logical sections. Only the already implement
 - [ ] Scale tool
 - [ ] Shear tool
 - [ ] Puppet Warp tool
+- [ ] Reshape, Twirl, Pucker, Bloat, Scallop, Crystallize and Wrinkle tools
 
 ### Symbol, graph and navigation tools
-- [ ] Symbol Sprayer and symbol editing family
+- [ ] Symbol Sprayer, Shifter, Scruncher, Sizer, Spinner, Stainer, Screener and Styler tools
 - [ ] Graph tools: column, stacked column, bar, stacked bar, line, area, scatter, pie, radar
 - [ ] Artboard tool
+- [ ] Slice and Slice Selection tools
+- [ ] Measure tool
+- [ ] Perspective Grid and Perspective Selection tools
 - [ ] Hand/pan tool
 - [ ] Zoom tool
 
@@ -131,7 +137,10 @@ The visible toolbar is grouped into logical sections. Only the already implement
 - [~] Fill color control (existing basic implementation)
 - [x] Stroke row visual
 - [x] Opacity and blend-mode visuals
+- [x] Color spectrum and gradient preview placeholders
+- [x] Character and Paragraph inspector placeholder (shown for text selections)
 - [ ] Solid, gradient and pattern fills
+- [ ] Color models, swatch groups and color picker workflows
 - [ ] Multiple fills and strokes / Appearance stack
 - [ ] Opacity masks and transparency controls
 - [ ] Blend modes and isolation
