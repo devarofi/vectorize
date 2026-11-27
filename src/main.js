@@ -215,12 +215,12 @@ function renderEditor() {
             <section class="panel-section selection-properties" id="align-properties">
               <div class="section-heading"><h3>Align</h3><button class="panel-more" type="button" title="More alignment options">···</button></div>
               <div class="icon-action-grid">
-                <button type="button" title="Align left">⇤</button><button type="button" title="Horizontal center">↔</button><button type="button" title="Align right">⇥</button>
-                <button type="button" title="Align top">⇡</button><button type="button" title="Vertical center">↕</button><button type="button" title="Align bottom">⇣</button>
+                <button type="button" data-align="left" title="Align left">⇤</button><button type="button" data-align="center-x" title="Horizontal center">↔</button><button type="button" data-align="right" title="Align right">⇥</button>
+                <button type="button" data-align="top" title="Align top">⇡</button><button type="button" data-align="center-y" title="Vertical center">↕</button><button type="button" data-align="bottom" title="Align bottom">⇣</button>
               </div>
               <div class="property-row"><span>Align to</span><div class="fake-select">Selection <span>⌄</span></div></div>
               <div class="icon-action-grid distribute-grid">
-                <button type="button" title="Distribute horizontal spacing">⇹</button><button type="button" title="Distribute vertical spacing">⇳</button><button type="button" title="Horizontal distribute centers">☷</button>
+                <button type="button" data-distribute="x" title="Distribute horizontal spacing">⇹</button><button type="button" data-distribute="y" title="Distribute vertical spacing">⇳</button><button type="button" data-distribute="x" title="Distribute horizontal spacing">☷</button>
               </div>
             </section>
 
@@ -306,7 +306,7 @@ function renderEditor() {
   const menuItems = {
     File: [['New', 'new'], ['Open JSON…', 'open'], ['Save JSON', 'save'], ['Export SVG', 'svg']],
     Edit: [['Undo', 'undo'], ['Redo', 'redo'], ['Select all', 'select-all'], ['Deselect', 'deselect'], ['Duplicate', 'duplicate'], ['Delete', 'delete']],
-    Object: [['Bring to front', 'front'], ['Send to back', 'back'], ['Align left', 'align-left'], ['Center horizontally', 'align-center-x'], ['Align right', 'align-right'], ['Align top', 'align-top'], ['Center vertically', 'align-center-y'], ['Align bottom', 'align-bottom']],
+    Object: [['Bring to front', 'front'], ['Send to back', 'back'], ['Align left', 'align-left'], ['Center horizontally', 'align-center-x'], ['Align right', 'align-right'], ['Align top', 'align-top'], ['Center vertically', 'align-center-y'], ['Align bottom', 'align-bottom'], ['Distribute horizontally', 'distribute-x'], ['Distribute vertically', 'distribute-y']],
     Type: [['Create text', 'unsupported-type']],
     Select: [['Select all', 'select-all'], ['Deselect', 'deselect']],
     Effect: [['Effects are not available for current geometry model', 'noop']],
@@ -339,6 +339,8 @@ function renderEditor() {
       case 'align-top': store.alignSelected('top'); break;
       case 'align-center-y': store.alignSelected('center-y'); break;
       case 'align-bottom': store.alignSelected('bottom'); break;
+      case 'distribute-x': store.distributeSelected('x'); break;
+      case 'distribute-y': store.distributeSelected('y'); break;
       case 'fit': store.resetView(); break;
       case 'zoom-in': store.zoom(1.25); break;
       case 'zoom-out': store.zoom(0.8); break;
@@ -400,6 +402,12 @@ function renderEditor() {
     scheduleRender();
   }));
   document.querySelectorAll('[data-action]').forEach((button) => button.addEventListener('click', () => runCommand(button.dataset.action)));
+  document.querySelectorAll('[data-align]').forEach((button) => button.addEventListener('click', () => {
+    store.alignSelected(button.dataset.align); scheduleRender();
+  }));
+  document.querySelectorAll('[data-distribute]').forEach((button) => button.addEventListener('click', () => {
+    store.distributeSelected(button.dataset.distribute); scheduleRender();
+  }));
 
   document.querySelectorAll('[data-tool]').forEach((button) => {
     button.addEventListener('click', () => {
