@@ -287,6 +287,7 @@ export function validateDocument(value) {
           !shape.style || !shape.geometry) throw new TypeError('Invalid shape data');
       if (ids.has(shape.id)) throw new TypeError('Duplicate document ID');
       ids.add(shape.id);
+      if (shape.rotation != null && !finite(shape.rotation)) throw new TypeError('Invalid shape rotation');
       const style = shape.style;
       if (!validColor(style.fill) || !validColor(style.stroke) ||
           !finite(style.strokeWidth) || style.strokeWidth < 0 ||
