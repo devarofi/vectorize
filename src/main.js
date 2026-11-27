@@ -2,7 +2,7 @@ import * as store from './store/editorStore.js';
 import { SvgRenderer } from './engine/renderer.js';
 import { InteractionController } from './engine/interactions.js';
 import { createRouter } from './app/router.js';
-import { createRect, createEllipse, createLine, createPath } from './core/document.js';
+import { createDocument, createRect, createEllipse, createLine, createPath } from './core/document.js';
 import './styles.css';
 
 const app = document.querySelector('#app');
@@ -160,6 +160,7 @@ function renderEditor() {
           </div>
         </aside>
         <input id="open-document-input" type="file" accept=".json,.vectorize.json,application/json" hidden />
+        <input id="open-svg-input" type="file" accept=".svg,image/svg+xml" hidden />
         <section class="canvas-area" aria-label="Drawing canvas">
           <div class="canvas-meta"><span>ARTBOARD · 1280 × 800</span><span id="zoom-label">100%</span></div>
           <div class="canvas-wrap"><svg id="editor-canvas" role="img" aria-label="Vector artwork canvas"></svg></div>
@@ -306,7 +307,7 @@ function renderEditor() {
   interactions = new InteractionController({ svg, renderer });
 
   const menuItems = {
-    File: [['New', 'new'], ['Open JSON…', 'open'], ['Save JSON', 'save'], ['Export SVG', 'svg'], ['Export PNG (1×)', 'png']],
+    File: [['New', 'new'], ['Open JSON…', 'open'], ['Import SVG…', 'open-svg'], ['Save JSON', 'save'], ['Export SVG', 'svg'], ['Export PNG (1×)', 'png']],
     Edit: [['Undo', 'undo'], ['Redo', 'redo'], ['Select all', 'select-all'], ['Deselect', 'deselect'], ['Duplicate', 'duplicate'], ['Delete', 'delete']],
     Object: [['Bring to front', 'front'], ['Send to back', 'back'], ['Align left', 'align-left'], ['Center horizontally', 'align-center-x'], ['Align right', 'align-right'], ['Align top', 'align-top'], ['Center vertically', 'align-center-y'], ['Align bottom', 'align-bottom'], ['Distribute horizontally', 'distribute-x'], ['Distribute vertically', 'distribute-y']],
     Type: [['Create text', 'unsupported-type']],
@@ -322,6 +323,7 @@ function renderEditor() {
     switch (command) {
       case 'new': if (confirm('Create a new document? Unsaved changes will be lost.')) store.newDocument(); break;
       case 'open': document.querySelector('#open-document-input').click(); break;
+      case 'open-svg': document.querySelector('#open-svg-input').click(); break;
       case 'save': downloadFile(`${doc.name || 'vectorize'}.vectorize.json`, JSON.stringify({ format: 'vectorize', version: 1, document: doc }, null, 2), 'application/json'); break;
       case 'svg': downloadFile(`${doc.name || 'vectorize'}.svg`, exportSvg(doc), 'image/svg+xml'); break;
       case 'png': exportPng(doc); break;
@@ -385,6 +387,19 @@ function renderEditor() {
       store.replaceDocument(parsed.document || parsed);
     } catch (error) {
       alert(`Could not open document: ${error.message}`);
+    }
+    event.target.value = '';
+    scheduleRender();
+  });
+  document.querySelector('#open-svg-input').addEventListener('change', async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const imported = importSvgDocument(await file.text(), file.name);
+      store.replaceDocument(imported.document);
+      if (imported.skipped) alert(`Imported ${imported.imported} SVG objects; skipped ${imported.skipped} unsupported or unsafe elements.`);
+    } catch (error) {
+      alert(`Could not import SVG: ${error.message}`);
     }
     event.target.value = '';
     scheduleRender();
@@ -695,6 +710,111 @@ function downloadFile(filename, content, type) {
   const anchor = document.createElement('a');
   anchor.href = url; anchor.download = filename; anchor.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function importSvgDocument(source, filename = 'Imported SVG') {
+  const xml = new DOMParser().parseFromString(source, 'image/svg+xml');
+  if (xml.querySelector('parsererror') || xml.documentElement.localName !== 'svg') {
+    throw new Error('Invalid SVG document');
+  }
+  const root = xml.documentElement;
+  const viewBox = (root.getAttribute('viewBox') || '').trim().split(/[ ,]+/).map(Number);
+  const width = Number.parseFloat(root.getAttribute('width')) || viewBox[2] || 1280;
+  const height = Number.parseFloat(root.getAttribute('height')) || viewBox[3] || 800;
+  const documentModel = createDocument({
+    name: filename.replace(/\.svg$/i, '') || 'Imported SVG',
+    width: Math.min(100000, Math.max(1, width)),
+    height: Math.min(100000, Math.max(1, height)),
+  });
+  const layer = documentModel.layers[0];
+  layer.shapes = [];
+  let skipped = 0;
+
+  const readStyle = (node, lineOnly = false) => {
+    const inline = Object.fromEntries((node.getAttribute('style') || '').split(';')
+      .map((part) => part.split(':').map((value) => value.trim()))
+      .filter((pair) => pair.length === 2 && pair[0]));
+    const get = (name, fallback) => node.getAttribute(name) || inline[name] || fallback;
+    const color = (value, fallback) => value === 'none' ? null : (/^#[0-9a-f]{3,8}$/i.test(value) ? value : fallback);
+    return {
+      fill: lineOnly ? null : color(get('fill', '#4f8ef7'), '#4f8ef7'),
+      stroke: color(get('stroke', '#1e3a8a'), '#1e3a8a'),
+      strokeWidth: Math.max(0, Number.parseFloat(get('stroke-width', '2')) || 0),
+      opacity: Math.max(0, Math.min(1, Number.parseFloat(get('opacity', '1')) || 0)),
+      strokeLinecap: ['butt', 'round', 'square'].includes(get('stroke-linecap', 'butt')) ? get('stroke-linecap', 'butt') : 'butt',
+      strokeLinejoin: ['miter', 'round', 'bevel'].includes(get('stroke-linejoin', 'miter')) ? get('stroke-linejoin', 'miter') : 'miter',
+      strokeDasharray: get('stroke-dasharray', 'none') === 'none' ? null : get('stroke-dasharray', 'none').replace(/[^0-9. ]/g, ''),
+    };
+  };
+  const number = (node, key, fallback = 0) => {
+    const value = Number.parseFloat(node.getAttribute(key));
+    return Number.isFinite(value) ? value : fallback;
+  };
+  const parsePoints = (value) => {
+    const values = value.trim().split(/[ ,]+/).map(Number);
+    if (values.length < 4 || values.length % 2 || values.some((item) => !Number.isFinite(item))) return null;
+    return Array.from({ length: values.length / 2 }, (_, index) => ({ x: values[index * 2], y: values[index * 2 + 1] }));
+  };
+  const parseLinearPath = (value) => {
+    const tokens = value.match(/[MLZmlz]|[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?/g) || [];
+    if (tokens.join('').replace(/\s/g, '') !== value.replace(/[\s,]/g, '')) return null;
+    const points = [];
+    let index = 0, command = '', closed = false, x = 0, y = 0;
+    while (index < tokens.length) {
+      if (/^[MLZmlz]$/.test(tokens[index])) command = tokens[index++];
+      if (command.toUpperCase() === 'Z') { closed = true; command = ''; continue; }
+      if (!['M', 'L'].includes(command.toUpperCase()) || index + 1 >= tokens.length) return null;
+      const nx = Number(tokens[index++]), ny = Number(tokens[index++]);
+      if (!Number.isFinite(nx) || !Number.isFinite(ny)) return null;
+      x = command === command.toLowerCase() ? x + nx : nx;
+      y = command === command.toLowerCase() ? y + ny : ny;
+      points.push({ x, y });
+      if (command.toUpperCase() === 'M') command = command === 'm' ? 'l' : 'L';
+    }
+    return points.length >= 2 ? { points, closed } : null;
+  };
+
+  const visit = (node) => {
+    for (const child of node.children) {
+      if (child.localName === 'g' && !child.hasAttribute('transform')) {
+        visit(child);
+        continue;
+      }
+      if (child.hasAttribute('transform')) { skipped++; continue; }
+      let shape = null;
+      const tag = child.localName;
+      if (tag === 'rect') {
+        shape = createRect(number(child, 'x'), number(child, 'y'), number(child, 'width'), number(child, 'height'), readStyle(child));
+        shape.geometry.rx = number(child, 'rx');
+        shape.geometry.ry = number(child, 'ry');
+        shape.name = 'Imported rectangle';
+      } else if (tag === 'ellipse') {
+        shape = createEllipse({ x: number(child, 'cx') - number(child, 'rx'), y: number(child, 'cy') - number(child, 'ry'), width: number(child, 'rx') * 2, height: number(child, 'ry') * 2 }, readStyle(child));
+        shape.name = 'Imported ellipse';
+      } else if (tag === 'line') {
+        shape = createLine({ x: number(child, 'x1'), y: number(child, 'y1') }, { x: number(child, 'x2'), y: number(child, 'y2') }, readStyle(child, true));
+        shape.name = 'Imported line';
+      } else if (tag === 'polyline' || tag === 'polygon') {
+        const points = parsePoints(child.getAttribute('points') || '');
+        if (points) {
+          shape = createPath(points, { closed: tag === 'polygon' }, readStyle(child, tag === 'polyline'));
+          shape.name = tag === 'polygon' ? 'Imported polygon' : 'Imported polyline';
+        }
+      } else if (tag === 'path') {
+        const parsed = parseLinearPath(child.getAttribute('d') || '');
+        if (parsed) {
+          shape = createPath(parsed.points, { closed: parsed.closed }, readStyle(child, !parsed.closed));
+          shape.name = 'Imported path';
+        }
+      } else if (!['title', 'desc', 'defs'].includes(tag)) {
+        skipped++;
+      }
+      if (shape) layer.shapes.push(shape);
+      else if (['rect', 'ellipse', 'line', 'polyline', 'polygon', 'path'].includes(tag)) skipped++;
+    }
+  };
+  visit(root);
+  return { document: documentModel, imported: layer.shapes.length, skipped };
 }
 
 function exportPng(doc) {
