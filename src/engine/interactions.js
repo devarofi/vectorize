@@ -319,6 +319,8 @@ export class InteractionController {
         } else {
           store.endTransformGesture(null);
         }
+        // Remove the transient SVG transform and sync committed geometry.
+        this.renderer.render();
         break;
       }
 
