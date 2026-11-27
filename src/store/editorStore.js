@@ -286,6 +286,31 @@ export function moveShapeZ(shapeId, dir) {
 }
 
 
+
+/** Apply one Chaikin smoothing pass to selected open/closed polyline paths. */
+export function smoothSelectedPaths() {
+  const ids = selection.peek();
+  if (!ids.length) return;
+  transact('Smooth paths', (draft) => {
+    for (const id of ids) {
+      const found = findShape(draft, id);
+      const shape = found?.shape;
+      if (shape?.kind !== 'path' || shape.geometry.points.length < 3) continue;
+      const points = shape.geometry.points;
+      const next = [];
+      if (!shape.geometry.closed) next.push(points[0]);
+      const count = shape.geometry.closed ? points.length : points.length - 1;
+      for (let i = 0; i < count; i++) {
+        const a = points[i], b = points[(i + 1) % points.length];
+        next.push({ x: a.x * 0.75 + b.x * 0.25, y: a.y * 0.75 + b.y * 0.25 });
+        next.push({ x: a.x * 0.25 + b.x * 0.75, y: a.y * 0.25 + b.y * 0.75 });
+      }
+      if (!shape.geometry.closed) next.push(points[points.length - 1]);
+      shape.geometry.points = next;
+    }
+  });
+}
+
 /** Select every visible object in the document. */
 export function selectAll() {
   selection.value = doc.peek().layers
