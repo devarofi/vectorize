@@ -176,3 +176,14 @@ test('Linear and radial fill gradients are stored as validated document data', (
   invalid.layers[0].shapes[0].style.fillGradient.stops[0].offset = 2;
   assert.throws(() => validateDocument(invalid), /Invalid gradient appearance/);
 });
+
+test('Rounded rectangle corner radius is contextual and undoable', () => {
+  store.newDocument();
+  const shape = createRect(0, 0, 40, 30);
+  store.addShape(shape);
+  store.setSelectedCornerRadius(12);
+  assert.equal(store.getSelectedShapes()[0].geometry.rx, 12);
+  assert.equal(store.getSelectedShapes()[0].geometry.ry, 12);
+  store.undo();
+  assert.equal(store.getSelectedShapes()[0].geometry.rx, undefined);
+});
