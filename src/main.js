@@ -306,12 +306,14 @@ function renderEditor() {
     scheduleRender();
   });
   document.querySelector('#prop-opacity').addEventListener('change', (event) => {
+    if (event.target.value.trim() === '') return;
     const value = Number(event.target.value);
     if (!Number.isFinite(value)) return;
     store.patchSelectedStyle({ opacity: Math.max(0, Math.min(100, value)) / 100 });
     scheduleRender();
   });
   document.querySelector('#prop-stroke-width').addEventListener('change', (event) => {
+    if (event.target.value.trim() === '') return;
     const value = Number(event.target.value);
     if (!Number.isFinite(value)) return;
     store.patchSelectedStyle({ strokeWidth: Math.max(0, value) });
@@ -319,6 +321,7 @@ function renderEditor() {
   });
   document.querySelectorAll('[data-transform]').forEach((input) => {
     input.addEventListener('change', () => {
+      if (input.value.trim() === '') return;
       const value = Number(input.value);
       if (!Number.isFinite(value)) return;
       const bounds = store.selectionBounds();
