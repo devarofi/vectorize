@@ -43,7 +43,9 @@ export class SvgRenderer {
     this.gridPattern = null;
     this.sceneRoot = el('g', { class: 'scene' });      // pan/zoom applied here
     this.overlayRoot = el('g', { class: 'overlay' });  // screen-space chrome
-    this.svg.append(this.artboardRect, this.sceneRoot, this.overlayRoot);
+    this.defs = el('defs');
+    this.gradientNodes = new Map();
+    this.svg.append(this.defs, this.artboardRect, this.sceneRoot, this.overlayRoot);
 
     this.overlay = {
       outline: el('rect', { class: 'sel-outline', fill: 'none', stroke: '#7dd3fc', 'stroke-width': 1, visibility: 'hidden' }),
@@ -140,8 +142,9 @@ export class SvgRenderer {
 
   #paintAttrs(shape) {
     const s = shape.style;
+    const gradientId = `vectorize-gradient-${String(shape.id).replace(/[^a-zA-Z0-9_-]/g, '_')}`;
     return {
-      fill: s.fill || 'none',
+      fill: s.fillGradient ? `url(#${gradientId})` : (s.fill || 'none'),
       stroke: s.stroke || 'none',
       'stroke-width': s.stroke ? fmt(s.strokeWidth) : '0',
       opacity: fmt(s.opacity),
@@ -150,6 +153,43 @@ export class SvgRenderer {
       'stroke-dasharray': s.strokeDasharray || 'none',
       style: s.blendMode && s.blendMode !== 'normal' ? `mix-blend-mode:${s.blendMode}` : '',
     };
+  }
+
+  #syncGradient(shape) {
+    const descriptor = shape.style?.fillGradient;
+    const id = `vectorize-gradient-${String(shape.id).replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+    const existing = this.gradientNodes.get(shape.id);
+    if (!descriptor) {
+      existing?.remove();
+      this.gradientNodes.delete(shape.id);
+      return;
+    }
+    const tag = descriptor.type === 'radial' ? 'radialGradient' : 'linearGradient';
+    let gradient = existing;
+    if (!gradient || gradient.tagName !== tag) {
+      gradient?.remove();
+      gradient = el(tag, { id, gradientUnits: 'objectBoundingBox' });
+      this.gradientNodes.set(shape.id, gradient);
+      this.defs.append(gradient);
+    }
+    if (tag === 'linearGradient') {
+      const angle = (Number(descriptor.angle) || 0) * Math.PI / 180;
+      const dx = Math.cos(angle) * 0.5, dy = Math.sin(angle) * 0.5;
+      gradient.setAttribute('x1', fmt(0.5 - dx, 6));
+      gradient.setAttribute('y1', fmt(0.5 - dy, 6));
+      gradient.setAttribute('x2', fmt(0.5 + dx, 6));
+      gradient.setAttribute('y2', fmt(0.5 + dy, 6));
+    } else {
+      gradient.setAttribute('cx', '0.5');
+      gradient.setAttribute('cy', '0.5');
+      gradient.setAttribute('r', '0.5');
+    }
+    const stops = Array.isArray(descriptor.stops) ? descriptor.stops : [];
+    gradient.replaceChildren(...stops.map((stop) => el('stop', {
+      offset: fmt(Math.max(0, Math.min(1, stop.offset))),
+      'stop-color': stop.color,
+      'stop-opacity': fmt(Math.max(0, Math.min(1, stop.opacity ?? 1))),
+    })));
   }
 
   #geometryAttrs(shape) {
@@ -186,6 +226,7 @@ export class SvgRenderer {
     }
 
     // Build a signature; skip setAttribute work when nothing changed.
+    this.#syncGradient(shape);
     const geo = this.#geometryAttrs(shape);
     const paint = this.#paintAttrs(shape);
     const dx = preview && preview.ids.includes(shape.id) ? preview.dx / vp.scale : 0;
@@ -216,6 +257,9 @@ export class SvgRenderer {
   }
 
   #pruneNodes(liveIds) {
+    for (const [id, gradient] of this.gradientNodes) {
+      if (!liveIds.has(id)) { gradient.remove(); this.gradientNodes.delete(id); }
+    }
     for (const [id, entry] of this.nodes) {
       if (!liveIds.has(id)) {
         entry.node.remove();
