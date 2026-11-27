@@ -225,8 +225,10 @@ export class InteractionController {
         const delta = { x: p.x - g.origin.x, y: p.y - g.origin.y };
         const next = resizeBox(g.startBox, g.handle, delta, { keepAspect: e.shiftKey || g.keepAspect });
         g.nextBox = next;
-        // Live preview via ghost outline (no store writes per frame).
-        this.renderer.showGhost(next);
+        // Transform the actual selected SVG nodes every frame; document data
+        // remains untouched until pointer-up commits the single history entry.
+        store.previewResize(store.selection.peek(), g.startBox, next);
+        this.renderer.render();
         break;
       }
       case 'create': {
