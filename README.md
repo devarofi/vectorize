@@ -4,7 +4,7 @@ A browser-based vector graphics editor built with JavaScript, SVG, and Jetz.
 
 ## Requirements
 
-- Node.js 20 or newer
+- Node.js 22.x
 - pnpm 9.15.9 (pinned through `packageManager`)
 
 ## Run locally
@@ -26,7 +26,7 @@ Vite's SPA fallback supports refreshing or directly opening `/editor`.
 The repository includes `vercel.json` configured for Vite:
 
 - Framework: Vite
-- Install command: `pnpm install --no-frozen-lockfile` (uses pnpm; allows the first deployment before `pnpm-lock.yaml` is committed)
+- Install command: `pnpm install` (uses pnpm; allows the first deployment before `pnpm-lock.yaml` is committed)
 - Build command: `npm run build`
 - Output directory: `dist`
 - SPA rewrite: unknown application paths are served through `index.html`, so `/editor` works on direct navigation and refresh.
@@ -38,7 +38,7 @@ To deploy:
 3. Set the Node.js version to 20 or newer in Project Settings if it is not detected automatically.
 4. Deploy. Subsequent pushes to `main` will trigger production deployments when the repository is connected to Vercel.
 
-No environment variables are currently required by the frontend shell.
+Before the first deployment, generate and commit `pnpm-lock.yaml` by running `pnpm install` locally. Once the lockfile is committed, change the Vercel install command to `pnpm install --frozen-lockfile` (or remove the override and let Vercel detect pnpm from `pnpm-lock.yaml`). No application environment variables are currently required by the frontend shell.
 
 ## Available scripts
 
