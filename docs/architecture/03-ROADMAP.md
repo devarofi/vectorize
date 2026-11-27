@@ -2,7 +2,7 @@
 
 > Product: browser-based vector editor inspired by Adobe Illustrator  
 > Framework: Jetz (`@daevsoft/jetz`)  
-> Status at baseline: foundational editor modules exist; complete application shell and product workflows are not yet present in the inspected repository.
+> Status: the initial runnable web shell and `/` + `/editor` routes are now present; core correctness stabilization and automated tests remain the next priority.
 
 ## Guiding principle
 
@@ -35,10 +35,11 @@ Acceptance:
 **Goal:** make the engine usable as a real web application.
 
 Tasks:
-- [ ] Add HTML/app bootstrap and a Jetz-driven application root.
-- [ ] Add editor workspace layout: top menu, toolbar, canvas, layers panel, properties inspector, status bar.
+- [x] Add HTML/app bootstrap and a Jetz-driven application root.
+- [x] Add initial editor workspace layout: toolbar, canvas, basic layers/properties areas, and status bar.
+- [x] Add initial tool selection and keyboard shortcut hints.
+- [ ] Complete menu, layers panel, and properties inspector workflows.
 - [ ] Add responsive behavior for smaller viewports.
-- [ ] Add tool selection and keyboard shortcut UI.
 - [ ] Add document title and unsaved-change indicator.
 - [ ] Add empty state and sample document.
 - [ ] Add error boundary/reporting strategy suitable for the app architecture.
