@@ -50,6 +50,9 @@ export const statusText = stateOf('Ready');
 /** Live preview transform applied during a drag gesture (screen px delta). */
 export const dragPreview = stateOf(/** @type {null|{ids:string[],dx:number,dy:number}} */ (null));
 
+/** Live geometry preview for a resize gesture; never enters document history. */
+export const resizePreview = stateOf(/** @type {null|{ids:string[],startBox:Object,endBox:Object}} */ (null));
+
 /** True while a pan/zoom gesture is running so panels can skip updates. */
 export const isGesturing = stateOf(false);
 
@@ -295,6 +298,15 @@ export function previewTransform(ids, dx, dy) {
   dragPreview.value = ids.length ? { ids: ids.slice(), dx, dy } : null;
 }
 
+/** Update selected object geometry visually while a resize gesture is active. */
+export function previewResize(ids, startBox, endBox) {
+  resizePreview.value = ids.length ? {
+    ids: ids.slice(),
+    startBox: { ...startBox },
+    endBox: { ...endBox },
+  } : null;
+}
+
 /**
  * Commit the finished gesture as ONE history entry. If nothing moved, the
  * gesture is discarded silently.
@@ -302,6 +314,7 @@ export function previewTransform(ids, dx, dy) {
 export function endTransformGesture(mutateFinal) {
   isGesturing.value = false;
   dragPreview.value = null;
+  resizePreview.value = null;
   const before = gestureBefore;
   gestureBefore = null;
   if (!before || !mutateFinal) return;
