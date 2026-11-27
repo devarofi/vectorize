@@ -125,6 +125,21 @@ export function addShape(shape, layerId = null) {
   statusText.value = `${shape.name} added`;
 }
 
+
+/** Add multiple related primitives as one undoable creation operation. */
+export function addShapes(shapes, layerId = null) {
+  if (!shapes?.length) return;
+  const requested = layerId || activeLayerId.peek();
+  const ids = shapes.map((shape) => shape.id);
+  transact(shapes.length > 1 ? `Add ${shapes.length} objects` : `Add ${shapes[0].name}`, (draft) => {
+    const layer = (requested && draft.layers.find((item) => item.id === requested && item.visible)) ||
+      [...draft.layers].reverse().find((item) => item.visible);
+    if (!layer) return;
+    for (const shape of shapes) layer.shapes.push(cloneDocument(shape));
+  });
+  selection.value = ids;
+}
+
 /** Delete the current selection (single undo step even for many shapes). */
 export function deleteSelected() {
   const ids = selection.peek();
