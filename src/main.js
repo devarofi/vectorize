@@ -2,6 +2,7 @@ import * as store from './store/editorStore.js';
 import { SvgRenderer } from './engine/renderer.js';
 import { InteractionController } from './engine/interactions.js';
 import { createRouter } from './app/router.js';
+import { createRect, createEllipse, createLine } from './core/document.js';
 import './styles.css';
 
 const app = document.querySelector('#app');
@@ -33,9 +34,10 @@ function renderEditor() {
         <a class="brand" href="/editor" aria-label="Vectorize home"><span class="brand-mark">V</span><span>Vectorize</span></a>
         <div class="document-name">Untitled document <span class="unsaved-dot" title="Unsaved changes"></span></div>
         <nav class="main-menu" aria-label="Main menu">
-          <button type="button">File</button><button type="button">Edit</button><button type="button">Object</button>
-          <button type="button">Type</button><button type="button">Select</button><button type="button">Effect</button>
-          <button type="button">View</button><button type="button">Window</button><button type="button">Help</button>
+          <button type="button" data-menu="File">File</button><button type="button" data-menu="Edit">Edit</button><button type="button" data-menu="Object">Object</button>
+          <button type="button" data-menu="Type">Type</button><button type="button" data-menu="Select">Select</button><button type="button" data-menu="Effect">Effect</button>
+          <button type="button" data-menu="View">View</button><button type="button" data-menu="Window">Window</button><button type="button" data-menu="Help">Help</button>
+          <div id="menu-popover" class="menu-popover" hidden></div>
         </nav>
         <div class="top-actions">
           <button class="ui-button" id="undo" title="Undo (Ctrl+Z)">↶ <span>Undo</span></button>
@@ -155,6 +157,7 @@ function renderEditor() {
             <button type="button" class="tool-button tool-footer-button" title="Swap fill and stroke">⇄</button>
           </div>
         </aside>
+        <input id="open-document-input" type="file" accept=".json,.vectorize.json,application/json" hidden />
         <section class="canvas-area" aria-label="Drawing canvas">
           <div class="canvas-meta"><span>ARTBOARD · 1280 × 800</span><span id="zoom-label">100%</span></div>
           <div class="canvas-wrap"><svg id="editor-canvas" role="img" aria-label="Vector artwork canvas"></svg></div>
@@ -162,9 +165,9 @@ function renderEditor() {
         </section>
         <aside class="inspector" aria-label="Properties and document panels">
           <div class="inspector-tabs" role="tablist" aria-label="Right panels">
-            <button type="button" class="inspector-tab active" role="tab" aria-selected="true">Properties</button>
-            <button type="button" class="inspector-tab" role="tab" aria-selected="false">Layers</button>
-            <button type="button" class="inspector-tab" role="tab" aria-selected="false">Assets</button>
+            <button type="button" class="inspector-tab active" role="tab" aria-selected="true" data-panel-tab="properties">Properties</button>
+            <button type="button" class="inspector-tab" role="tab" aria-selected="false" data-panel-tab="layers">Layers</button>
+            <button type="button" class="inspector-tab" role="tab" aria-selected="false" data-panel-tab="assets">Assets</button>
           </div>
           <div class="inspector-scroll">
             <section class="panel-section selection-summary">
@@ -268,13 +271,26 @@ function renderEditor() {
             <section class="panel-section">
               <div class="section-heading"><h3>Quick Actions</h3></div>
               <div class="quick-action-grid">
-                <button type="button">Group</button><button type="button">Arrange</button>
-                <button type="button">Duplicate</button><button type="button">Lock</button>
+                <button type="button" data-action="duplicate">Duplicate</button><button type="button" data-action="front">Bring front</button>
+                <button type="button" data-action="back">Send back</button><button type="button" data-action="delete">Delete</button>
               </div>
             </section>
-            <section class="panel-section layers-preview">
-              <div class="section-heading"><h3>Layers</h3><button type="button" class="panel-more" title="Layer options">···</button></div>
-              <div class="layer-row"><span class="layer-eye">◉</span><span class="layer-dot"></span><span>Layer 1</span><span class="layer-visible">●</span></div>
+            <section class="inspector-page" id="panel-layers" hidden>
+              <div class="panel-section">
+                <div class="section-heading"><h3>Layers</h3><button type="button" class="mini-icon-button" id="add-layer" title="Add layer">＋</button></div>
+                <div id="layer-list" class="layer-list"></div>
+              </div>
+            </section>
+            <section class="inspector-page" id="panel-assets" hidden>
+              <div class="panel-section">
+                <div class="section-heading"><h3>Quick Assets</h3><span class="muted">Click to add</span></div>
+                <div class="asset-grid">
+                  <button type="button" data-asset="rect"><span class="asset-thumb asset-rect"></span>Rectangle</button>
+                  <button type="button" data-asset="ellipse"><span class="asset-thumb asset-ellipse"></span>Ellipse</button>
+                  <button type="button" data-asset="line"><span class="asset-thumb asset-line"></span>Line</button>
+                  <button type="button" data-asset="star"><span class="asset-thumb asset-star">☆</span>Star</button>
+                </div>
+              </div>
             </section>
           </div>
         </aside>
@@ -284,6 +300,99 @@ function renderEditor() {
   const svg = document.querySelector('#editor-canvas');
   renderer = new SvgRenderer({ svg, store });
   interactions = new InteractionController({ svg, renderer });
+
+  const menuItems = {
+    File: [['New', 'new'], ['Open JSON…', 'open'], ['Save JSON', 'save'], ['Export SVG', 'svg']],
+    Edit: [['Undo', 'undo'], ['Redo', 'redo'], ['Select all', 'select-all'], ['Deselect', 'deselect'], ['Duplicate', 'duplicate'], ['Delete', 'delete']],
+    Object: [['Bring to front', 'front'], ['Send to back', 'back'], ['Align left', 'align-left'], ['Center horizontally', 'align-center-x'], ['Align right', 'align-right'], ['Align top', 'align-top'], ['Center vertically', 'align-center-y'], ['Align bottom', 'align-bottom']],
+    Type: [['Create text', 'unsupported-type']],
+    Select: [['Select all', 'select-all'], ['Deselect', 'deselect']],
+    Effect: [['Effects are not available for current geometry model', 'noop']],
+    View: [['Fit artboard', 'fit'], ['Zoom in', 'zoom-in'], ['Zoom out', 'zoom-out']],
+    Window: [['Properties panel', 'panel-properties'], ['Layers panel', 'panel-layers'], ['Assets panel', 'panel-assets']],
+    Help: [['Keyboard shortcuts', 'shortcuts'], ['Feature support', 'support']],
+  };
+  const menuPopover = document.querySelector('#menu-popover');
+  const runCommand = (command) => {
+    const doc = store.doc.peek();
+    switch (command) {
+      case 'new': if (confirm('Create a new document? Unsaved changes will be lost.')) store.newDocument(); break;
+      case 'open': document.querySelector('#open-document-input').click(); break;
+      case 'save': downloadFile(`${doc.name || 'vectorize'}.vectorize.json`, JSON.stringify(doc, null, 2), 'application/json'); break;
+      case 'svg': downloadFile(`${doc.name || 'vectorize'}.svg`, exportSvg(doc), 'image/svg+xml'); break;
+      case 'undo': store.undo(); break;
+      case 'redo': store.redo(); break;
+      case 'select-all': store.selectAll(); break;
+      case 'deselect': store.clearSelection(); break;
+      case 'duplicate': store.duplicateSelected(); break;
+      case 'delete': store.deleteSelected(); break;
+      case 'front': store.arrangeSelected('front'); break;
+      case 'back': store.arrangeSelected('back'); break;
+      case 'align-left': store.alignSelected('left'); break;
+      case 'align-center-x': store.alignSelected('center-x'); break;
+      case 'align-right': store.alignSelected('right'); break;
+      case 'align-top': store.alignSelected('top'); break;
+      case 'align-center-y': store.alignSelected('center-y'); break;
+      case 'align-bottom': store.alignSelected('bottom'); break;
+      case 'fit': store.resetView(); break;
+      case 'zoom-in': store.zoom(1.25); break;
+      case 'zoom-out': store.zoom(0.8); break;
+      case 'panel-properties': switchPanel('properties'); break;
+      case 'panel-layers': switchPanel('layers'); break;
+      case 'panel-assets': switchPanel('assets'); break;
+      case 'shortcuts': alert('V Select · R Rectangle · O Ellipse · L Line · P Pen · Ctrl/Cmd+Z Undo · Ctrl/Cmd+Y Redo · Delete Remove'); break;
+      case 'support': alert('Implemented: selection, primitive drawing, transform, appearance, layer visibility, arrange, alignment and JSON/SVG export. Other tools are marked in the feature progress document.'); break;
+      case 'unsupported-type': alert('Text layout is not implemented yet.'); break;
+    }
+    menuPopover.hidden = true;
+    scheduleRender();
+  };
+  document.querySelectorAll('[data-menu]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const name = button.dataset.menu;
+      const items = menuItems[name] || [];
+      menuPopover.innerHTML = items.map(([label, command]) =>
+        `<button type="button" class="menu-item" data-command="${command}">${escapeHtml(label)}</button>`
+      ).join('');
+      menuPopover.hidden = false;
+      menuPopover.style.left = `${button.offsetLeft}px`;
+      menuPopover.style.top = `${button.offsetTop + button.offsetHeight}px`;
+      menuPopover.querySelectorAll('[data-command]').forEach((item) => item.addEventListener('click', () => runCommand(item.dataset.command)));
+    });
+  });
+  document.addEventListener('pointerdown', (event) => {
+    if (!event.target.closest('.main-menu')) menuPopover.hidden = true;
+  });
+  document.querySelector('#open-document-input').addEventListener('change', async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const parsed = JSON.parse(await file.text());
+      store.replaceDocument(parsed);
+    } catch (error) {
+      alert(`Could not open document: ${error.message}`);
+    }
+    event.target.value = '';
+    scheduleRender();
+  });
+  document.querySelector('#add-layer').addEventListener('click', () => {
+    store.addLayer();
+    scheduleRender();
+  });
+  document.querySelectorAll('[data-asset]').forEach((button) => button.addEventListener('click', () => {
+    const x = 80 + Math.random() * 240, y = 80 + Math.random() * 180;
+    const shape = button.dataset.asset === 'ellipse' ? createEllipse({ x, y, width: 90, height: 70 }) :
+      button.dataset.asset === 'line' ? createLine({ x, y }, { x: x + 100, y: y + 60 }) :
+      createRect(x, y, 100, 70);
+    if (button.dataset.asset === 'star') {
+      const points = starPoints(x + 50, y + 40, 38, 17, 5);
+      store.addShape({ id: `star_${Date.now()}`, kind: 'path', name: 'Star', visible: true,
+        style: { fill: '#f5b942', stroke: '#7c4a03', strokeWidth: 2, opacity: 1 }, geometry: { points, closed: true } });
+    } else store.addShape(shape);
+    switchPanel('properties');
+    scheduleRender();
+  }));
+  document.querySelectorAll('[data-action]').forEach((button) => button.addEventListener('click', () => runCommand(button.dataset.action)));
 
   document.querySelectorAll('[data-tool]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -361,6 +470,17 @@ function updatePanels() {
   const shapes = store.getSelectedShapes();
   const count = store.objectCount.value;
   document.querySelector('#object-count').textContent = `${count} ${count === 1 ? 'object' : 'objects'}`;
+  const layerList = document.querySelector('#layer-list');
+  if (layerList) {
+    layerList.innerHTML = store.doc.peek().layers.slice().reverse().map((layer) => `
+      <div class="layer-list-row" data-layer-id="${escapeHtml(layer.id)}">
+        <button type="button" class="layer-visibility" data-layer-visible="${escapeHtml(layer.id)}" title="Toggle visibility">${layer.visible ? '◉' : '○'}</button>
+        <span class="layer-list-name">${escapeHtml(layer.name)}</span><span class="layer-list-count">${layer.shapes.length}</span>
+      </div>`).join('');
+    layerList.querySelectorAll('[data-layer-visible]').forEach((button) => button.addEventListener('click', () => {
+      store.toggleLayerVisible(button.dataset.layerVisible); scheduleRender();
+    }));
+  }
   document.querySelector('#status-text').textContent = store.statusText.peek();
   document.querySelector('#zoom-label').textContent = `${Math.round(store.viewport.peek().scale * 100)}%`;
   document.querySelector('#undo').disabled = !store.canUndo.value;
@@ -417,6 +537,51 @@ function updatePanels() {
   document.querySelectorAll('[data-transform]').forEach((input) => { input.disabled = !hasSelection; });
   document.querySelectorAll('[data-tool]').forEach((button) => {
     button.classList.toggle('active', button.dataset.tool === store.activeTool.peek());
+  });
+}
+
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
+function downloadFile(filename, content, type) {
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const anchor = document.createElement('a');
+  anchor.href = url; anchor.download = filename; anchor.click();
+  URL.revokeObjectURL(url);
+}
+function exportSvg(doc) {
+  const shapes = doc.layers.filter((layer) => layer.visible).flatMap((layer) => layer.shapes.filter((shape) => shape.visible));
+  const nodes = shapes.map((shape) => {
+    const s = shape.style || {};
+    const paint = `fill="${escapeHtml(s.fill || 'none')}" stroke="${escapeHtml(s.stroke || 'none')}" stroke-width="${Number(s.strokeWidth) || 0}" opacity="${Number.isFinite(s.opacity) ? s.opacity : 1}"`;
+    const g = shape.geometry;
+    if (shape.kind === 'rect') return `<rect x="${g.x}" y="${g.y}" width="${g.width}" height="${g.height}" ${paint}/>`;
+    if (shape.kind === 'ellipse') return `<ellipse cx="${g.cx}" cy="${g.cy}" rx="${g.rx}" ry="${g.ry}" ${paint}/>`;
+    if (shape.kind === 'line') return `<line x1="${g.points[0].x}" y1="${g.points[0].y}" x2="${g.points[1].x}" y2="${g.points[1].y}" ${paint}/>`;
+    if (shape.kind === 'path') {
+      const d = g.points.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ') + (g.closed ? ' Z' : '');
+      return `<path d="${d}" ${paint}/>`;
+    }
+    return '';
+  }).join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${doc.width}" height="${doc.height}" viewBox="0 0 ${doc.width} ${doc.height}">${nodes}</svg>`;
+}
+function starPoints(cx, cy, outer, inner, count) {
+  return Array.from({ length: count * 2 }, (_, index) => {
+    const angle = -Math.PI / 2 + index * Math.PI / count;
+    const radius = index % 2 ? inner : outer;
+    return { x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius };
+  });
+}
+function switchPanel(name) {
+  document.querySelectorAll('[data-panel-tab]').forEach((tab) => {
+    const active = tab.dataset.panelTab === name;
+    tab.classList.toggle('active', active);
+    tab.setAttribute('aria-selected', String(active));
+  });
+  document.querySelectorAll('.inspector-scroll > .panel-section, .inspector-scroll > .inspector-page').forEach((panel) => {
+    panel.hidden = name === 'properties' ? panel.id === 'panel-layers' || panel.id === 'panel-assets' : panel.id !== `panel-${name}`;
   });
 }
 
