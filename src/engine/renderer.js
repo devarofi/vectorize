@@ -50,6 +50,7 @@ export class SvgRenderer {
       handles: {},
       ghost: el('rect', { class: 'ghost ghost-rect', visibility: 'hidden' }),
       ghostEllipse: el('ellipse', { class: 'ghost ghost-ellipse', visibility: 'hidden' }),
+      ghostLine: el('line', { class: 'ghost ghost-line', visibility: 'hidden' }),
       marquee: el('rect', { class: 'marquee', fill: 'rgba(125,211,252,.12)', stroke: '#7dd3fc', 'stroke-width': 1, 'stroke-dasharray': '3 3', visibility: 'hidden' }),
       penPath: el('polyline', { class: 'pen-preview', visibility: 'hidden' }),
       penAnchors: el('g', { class: 'pen-anchors' }),
@@ -67,7 +68,7 @@ export class SvgRenderer {
       this.overlay.handles[name] = h;
       this.handleGroup.append(h);
     }
-    this.overlayRoot.append(this.overlay.outline, this.handleGroup, this.overlay.ghost, this.overlay.ghostEllipse, this.overlay.marquee, this.overlay.penPath, this.overlay.penAnchors, this.overlay.penCursor);
+    this.overlayRoot.append(this.overlay.outline, this.handleGroup, this.overlay.ghost, this.overlay.ghostEllipse, this.overlay.ghostLine, this.overlay.marquee, this.overlay.penPath, this.overlay.penAnchors, this.overlay.penCursor);
   }
 
   /* ---------------------------------------------------------------- */
@@ -259,6 +260,8 @@ export class SvgRenderer {
     const height = Math.max(br.y - tl.y, 0);
     const rect = this.overlay.ghost;
     const ellipse = this.overlay.ghostEllipse;
+    const line = this.overlay.ghostLine;
+    line.setAttribute('visibility', 'hidden');
     if (kind === 'ellipse') {
       rect.setAttribute('visibility', 'hidden');
       ellipse.setAttribute('cx', fmt(tl.x + width / 2));
@@ -274,9 +277,25 @@ export class SvgRenderer {
     }
   }
 
+  /** Draw a true line preview between the drag start and current pointer. */
+  showLineGhost(startWorld, endWorld) {
+    this.overlay.ghost.setAttribute('visibility', 'hidden');
+    this.overlay.ghostEllipse.setAttribute('visibility', 'hidden');
+    const vp = this.store.viewport.peek();
+    const start = worldToScreen(vp, startWorld);
+    const end = worldToScreen(vp, endWorld);
+    const line = this.overlay.ghostLine;
+    line.setAttribute('x1', fmt(start.x));
+    line.setAttribute('y1', fmt(start.y));
+    line.setAttribute('x2', fmt(end.x));
+    line.setAttribute('y2', fmt(end.y));
+    line.setAttribute('visibility', 'visible');
+  }
+
   hideGhost() {
     this.overlay.ghost.setAttribute('visibility', 'hidden');
     this.overlay.ghostEllipse.setAttribute('visibility', 'hidden');
+    this.overlay.ghostLine.setAttribute('visibility', 'hidden');
   }
 
   /** Marquee selection rectangle in world coords. */
