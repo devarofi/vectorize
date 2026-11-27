@@ -187,8 +187,6 @@ export function applyBoxToShape(shape, box) {
       if (Number.isFinite(g.ry)) g.ry *= Math.abs(sy);
       break;
     }
-      break;
-    }
     case 'ellipse':
       g.cx = box.x + box.width / 2; g.cy = box.y + box.height / 2;
       g.rx = box.width / 2; g.ry = box.height / 2;
