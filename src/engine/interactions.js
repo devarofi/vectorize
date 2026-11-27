@@ -128,8 +128,15 @@ export class InteractionController {
           return;
         }
       }
+      // A double-click ends the current path. Handle it here (before the
+      // browser's dblclick event) so the second click is not stored twice.
+      if (e.detail >= 2) {
+        this.#finishPen(true);
+        return;
+      }
       this.penPoints.push(snapped);
       this.renderer.showPenPreview(this.penPoints, snapped);
+      store.statusText.value = 'Pen: click to add points · double-click or Enter to finish · Esc to cancel';
       return;
     }
 
@@ -226,9 +233,9 @@ export class InteractionController {
         g.current = this.#snap(this.#world(e));
         const box = boxFromCorners(g.start, g.current);
         if (g.kind === 'line') {
-          this.renderer.showGhost({ x: Math.min(g.start.x, g.current.x), y: Math.min(g.start.y, g.current.y), width: Math.abs(g.current.x - g.start.x), height: Math.abs(g.current.y - g.start.y) });
+          this.renderer.showGhost({ x: Math.min(g.start.x, g.current.x), y: Math.min(g.start.y, g.current.y), width: Math.abs(g.current.x - g.start.x), height: Math.abs(g.current.y - g.start.y) }, 'rect');
         } else {
-          this.renderer.showGhost(box);
+          this.renderer.showGhost(box, g.kind);
         }
         break;
       }
@@ -426,6 +433,8 @@ export class InteractionController {
     if (commit && pts.length >= 2) {
       store.addShape(createPath(pts, { closed: false }));
       this.renderer.render();
+    } else if (!commit && pts.length) {
+      store.statusText.value = 'Pen path cancelled';
     }
   }
 }
