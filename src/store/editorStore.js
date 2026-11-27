@@ -395,6 +395,7 @@ export function newDocument() {
     doc.value = createDocument({ name: 'Untitled' });
     selection.value = [];
     history.clear();
+    historyRevision.value += 1;
     resetView();
     statusText.value = 'New document';
   });
