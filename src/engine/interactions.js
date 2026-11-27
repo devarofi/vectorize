@@ -170,7 +170,7 @@ export class InteractionController {
       this.gesture = { mode: 'freehand', points: [this.#snap(point)], last: point, kind: tool };
       return;
     }
-    if (['rect', 'roundRect', 'ellipse', 'line', 'polygon', 'star'].includes(tool)) {
+    if (['rect', 'roundRect', 'ellipse', 'line', 'polygon', 'star', 'arc', 'spiral', 'rectGrid', 'polarGrid'].includes(tool)) {
       this.gesture = { mode: 'create', kind: tool, start: this.#snap(point), current: this.#snap(point) };
       return;
     }
@@ -448,11 +448,55 @@ export class InteractionController {
               return { x: cx + Math.cos(angle) * outerX * factor, y: cy + Math.sin(angle) * outerY * factor };
             });
             shape = createPath(points, { closed: true });
+            shape.style.fill = '#4f8ef7';
             shape.name = g.kind === 'star' ? 'Star' : 'Polygon';
+          }
+          if (g.kind === 'arc') {
+            const cx = b.x + b.width / 2, cy = b.y + b.height / 2;
+            const points = Array.from({ length: 33 }, (_, index) => {
+              const angle = Math.PI * index / 32;
+              return { x: cx + Math.cos(angle) * b.width / 2, y: cy - Math.sin(angle) * b.height / 2 };
+            });
+            shape = createPath(points, { closed: false });
+            shape.name = 'Arc';
+          }
+          if (g.kind === 'spiral') {
+            const cx = b.x + b.width / 2, cy = b.y + b.height / 2;
+            const points = Array.from({ length: 97 }, (_, index) => {
+              const t = index / 96, angle = -Math.PI / 2 + t * Math.PI * 6, radius = 2 + t * 0.48;
+              return { x: cx + Math.cos(angle) * b.width * 0.5 * t * radius, y: cy + Math.sin(angle) * b.height * 0.5 * t * radius };
+            });
+            shape = createPath(points, { closed: false });
+            shape.name = 'Spiral';
           }
         }
         if (g.kind === 'line' && Math.hypot(b.width, b.height) >= MIN_CREATE_SIZE) shape = createLine(g.start, g.current);
-        if (shape) {
+        if (g.kind === 'rectGrid' || g.kind === 'polarGrid') {
+          const shapes = [];
+          if (g.kind === 'rectGrid') {
+            const divisions = 4;
+            for (let i = 0; i <= divisions; i++) {
+              const x = b.x + b.width * i / divisions;
+              const y = b.y + b.height * i / divisions;
+              shapes.push(createLine({ x, y: b.y }, { x, y: b.y + b.height }));
+              shapes.push(createLine({ x: b.x, y }, { x: b.x + b.width, y }));
+            }
+          } else {
+            for (let i = 1; i <= 4; i++) {
+              const ellipse = createEllipse({ x: b.x + b.width * (1 - i / 4) / 2, y: b.y + b.height * (1 - i / 4) / 2, width: b.width * i / 4, height: b.height * i / 4 }, { fill: null });
+              ellipse.name = 'Polar Grid Ring';
+              shapes.push(ellipse);
+            }
+            const cx = b.x + b.width / 2, cy = b.y + b.height / 2;
+            for (let i = 0; i < 12; i++) {
+              const angle = i * Math.PI / 12;
+              shapes.push(createLine({ x: cx, y: cy }, { x: cx + Math.cos(angle) * b.width / 2, y: cy + Math.sin(angle) * b.height / 2 }));
+            }
+          }
+          shapes.forEach((item) => { item.style.fill = null; item.name = item.name || (g.kind === 'rectGrid' ? 'Grid line' : 'Polar grid line'); });
+          store.addShapes(shapes);
+          this.renderer.render();
+        } else if (shape) {
           store.addShape(shape);
           this.renderer.render();
         }
