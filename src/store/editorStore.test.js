@@ -62,3 +62,43 @@ test('Inspector style edits are undoable and redoable', () => {
   assert.equal(selected.style.fill, '#ff0000');
   assert.equal(selected.style.opacity, 0.5);
 });
+
+test('Object commands duplicate, arrange and align without losing selection', () => {
+  store.newDocument();
+  const left = createRect(0, 0, 20, 20);
+  const right = createRect(80, 40, 20, 20);
+  store.addShape(left);
+  store.addShape(right);
+
+  store.alignSelected('top');
+  let shapes = store.getSelectedShapes();
+  assert.equal(shapes[0].geometry.y, 0);
+  assert.equal(shapes[1].geometry.y, 0);
+
+  store.duplicateSelected();
+  assert.equal(store.selection.peek().length, 2);
+  assert.equal(store.doc.peek().layers[0].shapes.length, 4);
+
+  store.arrangeSelected('front');
+  const ordered = store.doc.peek().layers[0].shapes;
+  assert.deepEqual(ordered.slice(-2).map((shape) => shape.id), store.selection.peek());
+  store.undo();
+  assert.equal(store.doc.peek().layers[0].shapes.length, 4);
+});
+
+test('Layer and artboard commands are history tracked', () => {
+  store.newDocument();
+  const originalLayer = store.activeLayerId.peek();
+  store.addLayer('Artwork');
+  const addedLayer = store.activeLayerId.peek();
+  assert.notEqual(addedLayer, originalLayer);
+  store.renameLayer(addedLayer, 'Foreground');
+  assert.equal(store.doc.peek().layers.at(-1).name, 'Foreground');
+  store.setDocumentSize(1600, 900);
+  assert.equal(store.doc.peek().width, 1600);
+  assert.equal(store.doc.peek().height, 900);
+  store.undo();
+  assert.equal(store.doc.peek().width, 1280);
+  store.deleteEmptyLayer(addedLayer);
+  assert.equal(store.doc.peek().layers.length, 1);
+});
