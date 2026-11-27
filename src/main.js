@@ -175,10 +175,10 @@ function renderEditor() {
             <section class="panel-section selection-properties" id="object-properties">
               <div class="section-heading"><h3>Transform</h3><button class="panel-more" type="button" title="More transform options">···</button></div>
               <div class="transform-grid">
-                <label class="property-field"><span>X</span><input type="text" value="—" disabled /></label>
-                <label class="property-field"><span>Y</span><input type="text" value="—" disabled /></label>
-                <label class="property-field"><span>W</span><input type="text" value="—" disabled /></label>
-                <label class="property-field"><span>H</span><input type="text" value="—" disabled /></label>
+                <label class="property-field"><span>X</span><input id="prop-x" data-transform="x" type="number" step="any" value="—" disabled /></label>
+                <label class="property-field"><span>Y</span><input id="prop-y" data-transform="y" type="number" step="any" value="—" disabled /></label>
+                <label class="property-field"><span>W</span><input id="prop-width" data-transform="width" type="number" min="0" step="any" value="—" disabled /></label>
+                <label class="property-field"><span>H</span><input id="prop-height" data-transform="height" type="number" min="0" step="any" value="—" disabled /></label>
               </div>
               <div class="property-inline-row"><button type="button" class="mini-icon-button" title="Constrain proportions">↔</button><span class="muted">Constrain proportions</span><button type="button" class="mini-icon-button" title="More transform options">⌗</button></div>
             </section>
@@ -190,18 +190,18 @@ function renderEditor() {
                 <div class="appearance-control color-field"><input id="fill-color" type="color" value="#4f8ef7" /><span id="fill-value">#4F8EF7</span></div>
               </div>
               <div class="appearance-row">
-                <label class="appearance-label"><span class="appearance-chip stroke-chip">S</span>Stroke</label>
-                <div class="appearance-control"><span class="color-preview no-color"></span><span class="muted">None</span><button type="button" class="mini-icon-button" title="Stroke color">⌄</button></div>
+                <label class="appearance-label" for="stroke-color"><span class="appearance-chip stroke-chip">S</span>Stroke</label>
+                <div class="appearance-control color-field"><input id="stroke-color" type="color" value="#1e3a8a" /><span id="stroke-value">#1E3A8A</span></div>
               </div>
               <div class="appearance-row">
-                <label class="appearance-label">Opacity</label>
-                <div class="appearance-control"><input class="compact-number" type="text" value="100%" disabled /><span class="muted">Normal</span></div>
+                <label class="appearance-label" for="prop-opacity">Opacity</label>
+                <div class="appearance-control"><input id="prop-opacity" class="compact-number" type="number" min="0" max="100" step="1" value="100" /><span class="muted">%</span></div>
               </div>
             </section>
 
             <section class="panel-section selection-properties" id="stroke-properties">
               <div class="section-heading"><h3>Stroke</h3><button class="panel-more" type="button" title="More stroke options">···</button></div>
-              <div class="property-row"><span>Weight</span><input class="compact-number" type="text" value="1 pt" disabled /></div>
+              <div class="property-row"><label for="prop-stroke-width">Weight</label><input id="prop-stroke-width" class="compact-number" type="number" min="0" step="any" value="2" /></div>
               <div class="property-row"><span>Cap</span><div class="segmented-static"><span class="selected">Butt</span><span>Round</span><span>Project</span></div></div>
               <div class="property-row"><span>Join</span><div class="segmented-static"><span class="selected">Miter</span><span>Round</span><span>Bevel</span></div></div>
               <div class="property-row"><span>Profile</span><div class="fake-select">Uniform <span>⌄</span></div></div>
@@ -295,10 +295,41 @@ function renderEditor() {
   document.querySelector('#undo').addEventListener('click', () => { store.undo(); scheduleRender(); });
   document.querySelector('#redo').addEventListener('click', () => { store.redo(); scheduleRender(); });
   document.querySelector('#fit').addEventListener('click', () => { store.resetView(); scheduleRender(); });
-  document.querySelector('#fill-color').addEventListener('input', (event) => {
+  // Inspector edits are committed on change (not every keystroke), so each
+  // edit produces one clean Undo/Redo entry.
+  document.querySelector('#fill-color').addEventListener('change', (event) => {
     store.patchSelectedStyle({ fill: event.target.value });
-    document.querySelector('#fill-value').textContent = event.target.value.toUpperCase();
     scheduleRender();
+  });
+  document.querySelector('#stroke-color').addEventListener('change', (event) => {
+    store.patchSelectedStyle({ stroke: event.target.value });
+    scheduleRender();
+  });
+  document.querySelector('#prop-opacity').addEventListener('change', (event) => {
+    const value = Number(event.target.value);
+    if (!Number.isFinite(value)) return;
+    store.patchSelectedStyle({ opacity: Math.max(0, Math.min(100, value)) / 100 });
+    scheduleRender();
+  });
+  document.querySelector('#prop-stroke-width').addEventListener('change', (event) => {
+    const value = Number(event.target.value);
+    if (!Number.isFinite(value)) return;
+    store.patchSelectedStyle({ strokeWidth: Math.max(0, value) });
+    scheduleRender();
+  });
+  document.querySelectorAll('[data-transform]').forEach((input) => {
+    input.addEventListener('change', () => {
+      const value = Number(input.value);
+      if (!Number.isFinite(value)) return;
+      const bounds = store.selectionBounds();
+      if (!bounds) return;
+      const next = { ...bounds, [input.dataset.transform]: Math.max(
+        input.dataset.transform === 'width' || input.dataset.transform === 'height' ? 0 : -Infinity,
+        value
+      ) };
+      store.setSelectionBounds(next);
+      scheduleRender();
+    });
   });
 
   for (const type of ['pointerdown', 'pointermove', 'pointerup', 'wheel']) {
@@ -347,7 +378,40 @@ function updatePanels() {
   document.querySelector('#transparency-properties').hidden = selected.length === 0;
   document.querySelector('#type-properties').hidden = selected.length === 0 || shapes[0]?.kind !== 'text';
   document.querySelector('#document-properties').hidden = selected.length > 0;
-  document.querySelector('#fill-color').disabled = selected.length === 0;
+  const hasSelection = selected.length > 0;
+  const bounds = store.selectionBounds();
+  const setField = (selector, value) => {
+    const input = document.querySelector(selector);
+    if (!input) return;
+    if (document.activeElement !== input) input.value = value == null ? '' : String(value);
+    input.disabled = !hasSelection;
+  };
+  const numberText = (value) => Number.isFinite(value) ? String(Number(value.toFixed(3))) : '';
+  setField('#prop-x', bounds ? numberText(bounds.x) : '');
+  setField('#prop-y', bounds ? numberText(bounds.y) : '');
+  setField('#prop-width', bounds ? numberText(bounds.width) : '');
+  setField('#prop-height', bounds ? numberText(bounds.height) : '');
+
+  const uniform = (key) => {
+    if (!shapes.length) return null;
+    const values = shapes.map((shape) => shape.style?.[key]);
+    return values.every((value) => value === values[0]) ? values[0] : '__mixed__';
+  };
+  const fill = uniform('fill');
+  const stroke = uniform('stroke');
+  const opacity = uniform('opacity');
+  const strokeWidth = uniform('strokeWidth');
+  const fillInput = document.querySelector('#fill-color');
+  const strokeInput = document.querySelector('#stroke-color');
+  fillInput.disabled = !hasSelection;
+  strokeInput.disabled = !hasSelection;
+  if (fill !== '__mixed__' && typeof fill === 'string' && /^#[0-9a-f]{6}$/i.test(fill)) fillInput.value = fill;
+  if (stroke !== '__mixed__' && typeof stroke === 'string' && /^#[0-9a-f]{6}$/i.test(stroke)) strokeInput.value = stroke;
+  document.querySelector('#fill-value').textContent = fill === '__mixed__' ? 'Mixed' : (fill || 'None').toUpperCase();
+  document.querySelector('#stroke-value').textContent = stroke === '__mixed__' ? 'Mixed' : (stroke || 'None').toUpperCase();
+  setField('#prop-opacity', opacity === '__mixed__' ? '' : opacity == null ? 100 : numberText(opacity * 100));
+  setField('#prop-stroke-width', strokeWidth === '__mixed__' ? '' : strokeWidth == null ? 0 : numberText(strokeWidth));
+  document.querySelectorAll('[data-transform]').forEach((input) => { input.disabled = !hasSelection; });
   document.querySelectorAll('[data-tool]').forEach((button) => {
     button.classList.toggle('active', button.dataset.tool === store.activeTool.peek());
   });
