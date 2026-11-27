@@ -59,7 +59,6 @@ The visible toolbar is grouped into logical sections. Only the already implement
 - [ ] Type on a Path tool
 - [ ] Vertical Type tool
 - [ ] Touch Type tool
-- [ ] Touch Type tool
 - [ ] Font browser, paragraph and character controls
 
 ### Shape tools
@@ -178,6 +177,322 @@ The visible toolbar is grouped into logical sections. Only the already implement
 - [ ] Group, compound path and clipping mask controls
 - [ ] Symbol instance and graph data properties
 
+## 3A. Complete Properties-panel inventory
+
+The current right panel is a visual scaffold. The checklist below tracks both the visible controls and the full behavior expected from a professional contextual inspector.
+
+### Panel navigation and context
+- [x] Properties tab visual
+- [x] Layers tab visual
+- [x] Assets tab visual
+- [x] Selection summary and selected-object kind label
+- [x] Empty-selection / document-properties state
+- [ ] Functional tab switching and active-tab persistence
+- [ ] Collapse/expand sections and panel resizing
+- [ ] Panel docking, undocking and workspace presets
+- [ ] Multi-selection summary and mixed-value display
+- [ ] Context-sensitive sections per object type
+- [ ] Reset section values and restore defaults
+
+### Transform properties
+- [x] X position field visual
+- [x] Y position field visual
+- [x] Width field visual
+- [x] Height field visual
+- [x] Constrain-proportions affordance
+- [x] More-transform-options affordance
+- [ ] Read selected geometry and update values on selection
+- [ ] Edit X/Y/W/H numerically and commit through history
+- [ ] Rotation angle
+- [ ] Horizontal/vertical scale
+- [ ] Horizontal/vertical shear
+- [ ] Flip horizontal and vertical
+- [ ] Reference-point / transform-origin selector
+- [ ] Transform each selected object independently
+- [ ] Copy and repeat last transform
+- [ ] Units, precision and unit conversion
+- [ ] Reset bounding box and transform values
+- [ ] Pixel alignment and align-to-pixel options
+
+### Appearance properties
+- [x] Fill row and color-input visual
+- [x] Stroke row and no-color visual
+- [x] Opacity field visual
+- [x] Blend-mode label visual
+- [x] Color spectrum preview
+- [x] Gradient preview
+- [ ] Fill color picker with HEX, RGB, HSL and alpha
+- [ ] Fill type: solid, linear gradient, radial gradient, freeform gradient, pattern
+- [ ] Stroke color picker and stroke enable/disable
+- [ ] Multiple fills and multiple strokes
+- [ ] Appearance stack: add, remove, reorder and duplicate appearance entries
+- [ ] Per-appearance opacity and blend mode
+- [ ] Graphic styles: apply, create, update and manage
+- [ ] Revert appearance and clear appearance
+- [ ] Swatches, global colors and spot colors
+
+### Stroke properties
+- [x] Stroke weight field visual
+- [x] Cap choices visual: Butt, Round, Projecting
+- [x] Join choices visual: Miter, Round, Bevel
+- [x] Stroke profile selector visual
+- [ ] Editable stroke weight with units
+- [ ] Cap and join behavior
+- [ ] Miter limit
+- [ ] Dashed line pattern and dash offset
+- [ ] Stroke alignment: center, inside, outside
+- [ ] Arrowheads and endpoint markers
+- [ ] Variable-width profile editor
+- [ ] Width points and width handles
+- [ ] Expand stroke to editable outlines
+
+### Align and distribute properties
+- [x] Align left, horizontal center, align right visuals
+- [x] Align top, vertical center, align bottom visuals
+- [x] Align-to selector visual
+- [x] Horizontal/vertical distribution visuals
+- [ ] Align to selection
+- [ ] Align to key object
+- [ ] Align to artboard
+- [ ] Align to canvas
+- [ ] Distribute object centers
+- [ ] Distribute object spacing with numeric gap
+- [ ] Smart distribute and spacing preview
+- [ ] Align to pixel grid
+
+### Pathfinder and geometry operations
+- [x] Unite, Minus Front, Intersect and Exclude button visuals
+- [ ] Unite
+- [ ] Minus Front / subtract
+- [ ] Intersect
+- [ ] Exclude
+- [ ] Divide
+- [ ] Trim
+- [ ] Merge
+- [ ] Crop
+- [ ] Outline
+- [ ] Expand and expand appearance
+- [ ] Offset Path
+- [ ] Simplify Path
+- [ ] Shape Builder integration and live region preview
+
+### Color properties
+- [x] Color spectrum visual
+- [x] RGB mode selector visual
+- [ ] RGB, HSL, HSV, CMYK and grayscale modes
+- [ ] Numeric channel inputs and alpha
+- [ ] HEX input and validation
+- [ ] Color picker / eyedropper integration
+- [ ] Swatches panel, groups and global swatches
+- [ ] Recent colors and document colors
+- [ ] Color harmony and color conversion
+- [ ] Color profile management and document color settings
+
+### Gradient properties
+- [x] Gradient preview visual
+- [x] Linear type selector visual
+- [x] Angle field visual
+- [ ] Linear and radial gradient editing
+- [ ] Freeform gradient points and lines
+- [ ] Gradient stops, midpoint and stop opacity
+- [ ] Stop color editing and stop positioning
+- [ ] Gradient angle, aspect ratio and origin
+- [ ] Reverse gradient and reset gradient
+- [ ] Save gradient as swatch
+- [ ] Gradient annotator on canvas
+
+### Transparency properties
+- [x] Opacity field visual
+- [x] Blend mode selector visual
+- [x] Isolate blending state visual
+- [ ] Editable opacity
+- [ ] Blend modes (Normal, Multiply, Screen, Overlay, etc.)
+- [ ] Opacity mask creation and editing
+- [ ] Clip mask / invert mask / release mask
+- [ ] Knockout groups and isolation
+- [ ] Per-fill and per-stroke transparency
+
+### Character and paragraph properties
+- [x] Character & Paragraph section visual
+- [x] Font-family selector visual
+- [x] Size and leading field visuals
+- [x] Tracking and kerning field visuals
+- [x] Paragraph alignment button visuals
+- [ ] Font family search and font loading
+- [ ] Font style, weight, width and variable axes
+- [ ] Font size, leading, tracking, kerning and baseline shift
+- [ ] Horizontal/vertical scale and character rotation
+- [ ] Underline, strikethrough and capitalization
+- [ ] OpenType features and ligatures
+- [ ] Paragraph alignment, indentation and spacing
+- [ ] Columns, text inset and area-type options
+- [ ] Overflow detection and text threading
+- [ ] Text on path options and type orientation
+
+### Contextual geometry properties
+- [ ] Rectangle: X/Y/W/H, corner radii and independent corners
+- [ ] Rounded rectangle: per-corner radius
+- [ ] Ellipse: center, radius X/Y, start/end angle and closure
+- [ ] Polygon: sides, radius and rotation
+- [ ] Star: points, inner radius and outer radius
+- [ ] Line: endpoints, length, angle and direction
+- [ ] Arc: start/end, radius and sweep
+- [ ] Spiral: turns, decay and direction
+- [ ] Grid: rows, columns, cell sizes and dividers
+- [ ] Path: anchor count, closure, segment type and handle mode
+- [ ] Image: dimensions, crop, fit, embed/link and resolution
+- [ ] Group: dimensions, isolation and child count
+- [ ] Compound path: release and reverse path direction
+- [ ] Clipping mask: edit contents, release and opacity
+- [ ] Symbol instance: source, overrides and break link
+- [ ] Graph: data, type, axes, labels, legend and styling
+
+### Document and artboard properties
+- [x] Document width and height visuals
+- [x] Units selector visual
+- [x] Artboard label visual
+- [ ] Editable document width and height
+- [ ] Units: px, pt, mm, cm, inches
+- [ ] Artboard list, selection and navigation
+- [ ] Artboard dimensions, orientation and presets
+- [ ] Artboard background and transparency
+- [ ] Bleed, margins and safe area
+- [ ] Document color mode and color profile
+- [ ] Raster effects resolution
+- [ ] Export settings and export presets
+
+### Quick Actions and object management
+- [x] Group, Arrange, Duplicate and Lock button visuals
+- [x] Layers preview row
+- [ ] Group and ungroup
+- [ ] Duplicate and repeat duplicate
+- [ ] Bring forward/backward and bring to front/send to back
+- [ ] Lock/unlock and show/hide
+- [ ] Rename selected object
+- [ ] Create clipping mask and release clipping mask
+- [ ] Create compound path and release compound path
+- [ ] Expand, outline and rasterize
+- [ ] Delete and clean up unused objects
+- [ ] Add to assets/library and create reusable style
+
+## 2A. Complete toolbar checklist
+
+This is the per-button inventory for the current left toolbar. A visible button is not considered implemented until it has a real interaction, document operation, keyboard behavior where appropriate, and tests.
+
+### Selection group
+- [~] Selection (V) — select, move and resize objects
+- [ ] Direct Selection — select/edit individual anchors and path segments
+- [ ] Group Selection — select nested objects inside groups
+- [ ] Magic Wand — select objects by shared appearance/attributes
+- [ ] Lasso — freeform selection of anchors or objects
+
+### Drawing and path group
+- [~] Pen (P) — basic click-to-add polyline points
+- [ ] Curvature — create/edit smooth curved paths
+- [ ] Pencil — freehand path creation
+- [ ] Smooth — reduce path noise while preserving shape
+- [ ] Path Eraser — erase portions of paths
+- [ ] Join — join open path endpoints
+- [ ] Anchor Point — edit anchor handles and corner/smooth behavior
+- [ ] Add Anchor Point — insert anchors on segments
+- [ ] Delete Anchor Point — remove anchors while preserving path continuity
+- [ ] Convert Anchor Point — convert corner and smooth points
+
+### Type group
+- [ ] Type — create point text
+- [ ] Area Type — flow text inside a shape
+- [ ] Type on a Path — attach text to a path
+- [ ] Vertical Type — vertical text layout
+- [ ] Touch Type — manipulate individual glyphs
+- [ ] Font family and font browser
+- [ ] Font style/weight and variable-font axes
+- [ ] Font size, leading, tracking, kerning and baseline shift
+- [ ] Paragraph alignment, indentation, spacing and hyphenation
+- [ ] Text frame inset, columns and overflow handling
+- [ ] Text-to-outlines conversion and font fallback
+
+### Shape group
+- [~] Rectangle (R)
+- [ ] Rounded Rectangle — independent corner radii
+- [~] Ellipse (O)
+- [ ] Polygon — side count and radius
+- [ ] Star — point count, inner/outer radius
+- [~] Line Segment (L)
+- [ ] Arc — arc direction and endpoints
+- [ ] Spiral — turns, decay and direction
+- [ ] Rectangular Grid — rows, columns and dividers
+- [ ] Polar Grid — concentric circles and radial dividers
+- [ ] Flare — rays, rings and flare parameters
+
+### Paint and color group
+- [ ] Paintbrush (B) — brush strokes with editable paths
+- [ ] Blob Brush (Shift+B) — merge painted regions
+- [ ] Mesh (U) — gradient mesh points and color patches
+- [ ] Gradient (G) — interactive gradient annotator
+- [ ] Eyedropper (I) — sample and apply appearance
+- [ ] Live Paint Bucket (K) — fill detected regions
+- [ ] Live Paint Selection (Shift+L) — select live-paint regions
+- [ ] Brush library, brush presets and brush options
+- [ ] Pattern creation and pattern editing
+
+### Transform and edit group
+- [ ] Eraser (Shift+E) — erase artwork with path-aware results
+- [ ] Scissors (C) — cut paths at selected points
+- [ ] Knife — split shapes and paths
+- [ ] Width (Shift+W) — edit variable stroke width
+- [ ] Shape Builder (Shift+M) — merge/remove regions interactively
+- [ ] Free Transform (E) — scale, rotate, distort and perspective transform
+- [ ] Rotate — rotate around a chosen reference point
+- [ ] Reflect — mirror around an axis
+- [ ] Scale — uniform and non-uniform scaling
+- [ ] Shear — shear around an origin
+- [ ] Reshape — modify selected path portions
+- [ ] Warp — push/pull path geometry
+- [ ] Twirl — rotate geometry around a brush center
+- [ ] Pucker — pull geometry toward brush center
+- [ ] Bloat — push geometry away from brush center
+- [ ] Scallop — create inward/outward edge distortions
+- [ ] Crystallize — create pointed edge distortions
+- [ ] Wrinkle — create wrinkle-like edge distortions
+
+### Symbol and graph group
+- [ ] Symbol Sprayer — place symbol instances
+- [ ] Symbol Shifter — reposition instances
+- [ ] Symbol Scruncher — adjust instance spacing
+- [ ] Symbol Sizer — resize instances
+- [ ] Symbol Spinner — rotate instances
+- [ ] Symbol Stainer — adjust instance tint
+- [ ] Symbol Screener — adjust instance opacity
+- [ ] Symbol Styler — apply graphic styles to instances
+- [ ] Column Graph
+- [ ] Stacked Column Graph
+- [ ] Bar Graph
+- [ ] Stacked Bar Graph
+- [ ] Line Graph
+- [ ] Area Graph
+- [ ] Scatter Graph
+- [ ] Pie Graph
+- [ ] Radar Graph
+- [ ] Graph data editor, labels, axes, legends and style controls
+
+### Artboard, navigation and utility group
+- [ ] Artboard — create, resize, rename, reorder and export artboards
+- [ ] Hand — pan canvas
+- [ ] Zoom — zoom in/out and zoom to selection/artboard
+- [ ] Slice — define export regions
+- [ ] Slice Selection — select and edit slices
+- [ ] Measure — measure distance, angle and dimensions
+- [ ] Perspective Grid — configure perspective planes and grid
+- [ ] Perspective Selection — draw/edit objects in perspective
+- [ ] Fill/stroke swatch selector
+- [ ] Swap Fill and Stroke
+- [ ] Set default Fill and Stroke
+- [ ] Set Fill/Stroke to None
+- [ ] Color, gradient and pattern swatch shortcuts
+- [ ] Tool flyouts and alternate tools
+- [ ] Toolbar customization, single/double-column layout and reset
+- [ ] Tool options and contextual options bar
+
 ## 4. Layers, assets and object management
 
 - [x] Single-layer visual preview
@@ -253,7 +568,7 @@ The visible toolbar is grouped into logical sections. Only the already implement
 
 - UI buttons without a backing feature are intentionally inert; they must not mutate document state.
 - Existing basic tool buttons remain wired so current drawing workflows continue to work.
-- Resize previews update the selected SVG objects and selection handles on every animation-frame pointer update; pointer-up commits one history entry.
+- Resize previews apply a live SVG transform to selected objects and update selection handles during pointer movement; pointer-up commits one history entry.
 - The fill color input is retained as the one existing inspector action.
 - Controls are grouped by user intent, not by a promise of exact Adobe Illustrator behavior.
 - Feature parity is not a goal by itself; each item must be justified by a useful vector-design workflow and a maintainable document model.
