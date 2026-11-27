@@ -219,6 +219,16 @@ function transformShapePoints(shape, transformPoint) {
   shape.kind = 'path';
 }
 
+
+/** Rotate selection by a relative angle around the aggregate center. */
+export function rotateSelectedBy(degrees) {
+  const shapes = getSelectedShapes();
+  const amount = Number(degrees);
+  if (!shapes.length || !Number.isFinite(amount) || Math.abs(amount) < 1e-9) return;
+  const rotation = shapes[0].rotation || 0;
+  setSelectedRotation(rotation + amount);
+}
+
 /** Set an absolute rotation angle for selected objects around selection center. */
 export function setSelectedRotation(degrees) {
   const target = Number(degrees);
