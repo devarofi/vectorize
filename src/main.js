@@ -25,7 +25,8 @@ const toolButton = (glyph, label, shortcut = '', tool = '', extraClass = '') => 
   const active = tool === 'select' ? ' active' : '';
   const data = tool ? `data-tool="${tool}"` : 'data-feature-tool';
   const disabled = tool ? '' : ' disabled aria-disabled="true"';
-  return `<button class="tool-button${active} ${extraClass}" ${data}${disabled} type="button" title="${label}${shortcut && tool ? ` (${shortcut})` : ''}" aria-label="${label}"><span class="tool-glyph">${glyph}</span>${shortcut && tool ? `<small>${shortcut}</small>` : ''}</button>`;
+  const title = tool ? `${label}${shortcut ? ` (${shortcut})` : ''}` : `${label} — not implemented yet`;
+  return `<button class="tool-button${active} ${extraClass}" ${data}${disabled} type="button" title="${title}" aria-label="${label}"><span class="tool-glyph">${glyph}</span>${shortcut && tool ? `<small>${shortcut}</small>` : ''}</button>`;
 };
 
 function renderEditor() {
@@ -304,7 +305,7 @@ function renderEditor() {
   interactions = new InteractionController({ svg, renderer });
 
   const menuItems = {
-    File: [['New', 'new'], ['Open JSON…', 'open'], ['Save JSON', 'save'], ['Export SVG', 'svg']],
+    File: [['New', 'new'], ['Open JSON…', 'open'], ['Save JSON', 'save'], ['Export SVG', 'svg'], ['Export PNG (1×)', 'png']],
     Edit: [['Undo', 'undo'], ['Redo', 'redo'], ['Select all', 'select-all'], ['Deselect', 'deselect'], ['Duplicate', 'duplicate'], ['Delete', 'delete']],
     Object: [['Bring to front', 'front'], ['Send to back', 'back'], ['Align left', 'align-left'], ['Center horizontally', 'align-center-x'], ['Align right', 'align-right'], ['Align top', 'align-top'], ['Center vertically', 'align-center-y'], ['Align bottom', 'align-bottom'], ['Distribute horizontally', 'distribute-x'], ['Distribute vertically', 'distribute-y']],
     Type: [['Create text', 'unsupported-type']],
@@ -322,6 +323,7 @@ function renderEditor() {
       case 'open': document.querySelector('#open-document-input').click(); break;
       case 'save': downloadFile(`${doc.name || 'vectorize'}.vectorize.json`, JSON.stringify({ format: 'vectorize', version: 1, document: doc }, null, 2), 'application/json'); break;
       case 'svg': downloadFile(`${doc.name || 'vectorize'}.svg`, exportSvg(doc), 'image/svg+xml'); break;
+      case 'png': exportPng(doc); break;
       case 'undo': store.undo(); break;
       case 'redo': store.redo(); break;
       case 'select-all': store.selectAll(); break;
@@ -507,6 +509,8 @@ function updatePanels() {
   const shapes = store.getSelectedShapes();
   const count = store.objectCount.value;
   document.querySelector('#object-count').textContent = `${count} ${count === 1 ? 'object' : 'objects'}`;
+  document.querySelector('.document-name').firstChild.textContent = store.doc.peek().name || 'Untitled';
+  document.querySelector('.canvas-meta span').textContent = `ARTBOARD · ${store.doc.peek().width} × ${store.doc.peek().height}`;
   const layerList = document.querySelector('#layer-list');
   if (layerList) {
     layerList.innerHTML = store.doc.peek().layers.slice().reverse().map((layer) => `
@@ -615,6 +619,32 @@ function downloadFile(filename, content, type) {
   anchor.href = url; anchor.download = filename; anchor.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+function exportPng(doc) {
+  const source = new Blob([exportSvg(doc)], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(source);
+  const image = new Image();
+  image.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = doc.width;
+    canvas.height = doc.height;
+    const context = canvas.getContext('2d');
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => {
+      if (blob) downloadBlob(`${doc.name || 'vectorize'}.png`, blob);
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  };
+  image.onerror = () => { URL.revokeObjectURL(url); alert('PNG export failed.'); };
+  image.src = url;
+}
+function downloadBlob(filename, blob) {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url; anchor.download = filename; anchor.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 function exportSvg(doc) {
   const shapes = doc.layers.filter((layer) => layer.visible).flatMap((layer) => layer.shapes.filter((shape) => shape.visible));
   const nodes = shapes.map((shape) => {
