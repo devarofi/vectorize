@@ -24,7 +24,8 @@ function scheduleRender() {
 const toolButton = (glyph, label, shortcut = '', tool = '', extraClass = '') => {
   const active = tool === 'select' ? ' active' : '';
   const data = tool ? `data-tool="${tool}"` : 'data-feature-tool';
-  return `<button class="tool-button${active} ${extraClass}" ${data} type="button" title="${label}${shortcut && tool ? ` (${shortcut})` : ''}" aria-label="${label}"><span class="tool-glyph">${glyph}</span>${shortcut && tool ? `<small>${shortcut}</small>` : ''}</button>`;
+  const disabled = tool ? '' : ' disabled aria-disabled="true"';
+  return `<button class="tool-button${active} ${extraClass}" ${data}${disabled} type="button" title="${label}${shortcut && tool ? ` (${shortcut})` : ''}" aria-label="${label}"><span class="tool-glyph">${glyph}</span>${shortcut && tool ? `<small>${shortcut}</small>` : ''}</button>`;
 };
 
 function renderEditor() {
@@ -152,9 +153,9 @@ function renderEditor() {
             ${toolButton('⌖', 'Perspective Selection Tool')}
           </div>
           <div class="tool-footer">
-            <button type="button" class="color-swatch-button" title="Fill and stroke swatches"><span class="swatch-fill"></span><span class="swatch-stroke"></span></button>
-            <button type="button" class="tool-button tool-footer-button" title="Default fill and stroke">↺</button>
-            <button type="button" class="tool-button tool-footer-button" title="Swap fill and stroke">⇄</button>
+            <button type="button" class="color-swatch-button" data-action="none-fill" title="Set fill to none"><span class="swatch-fill"></span><span class="swatch-stroke"></span></button>
+            <button type="button" class="tool-button tool-footer-button" data-action="default-colors" title="Default fill and stroke">↺</button>
+            <button type="button" class="tool-button tool-footer-button" data-action="swap-colors" title="Swap fill and stroke">⇄</button>
           </div>
         </aside>
         <input id="open-document-input" type="file" accept=".json,.vectorize.json,application/json" hidden />
@@ -319,13 +320,16 @@ function renderEditor() {
     switch (command) {
       case 'new': if (confirm('Create a new document? Unsaved changes will be lost.')) store.newDocument(); break;
       case 'open': document.querySelector('#open-document-input').click(); break;
-      case 'save': downloadFile(`${doc.name || 'vectorize'}.vectorize.json`, JSON.stringify(doc, null, 2), 'application/json'); break;
+      case 'save': downloadFile(`${doc.name || 'vectorize'}.vectorize.json`, JSON.stringify({ format: 'vectorize', version: 1, document: doc }, null, 2), 'application/json'); break;
       case 'svg': downloadFile(`${doc.name || 'vectorize'}.svg`, exportSvg(doc), 'image/svg+xml'); break;
       case 'undo': store.undo(); break;
       case 'redo': store.redo(); break;
       case 'select-all': store.selectAll(); break;
       case 'deselect': store.clearSelection(); break;
       case 'duplicate': store.duplicateSelected(); break;
+      case 'default-colors': store.patchSelectedStyle({ fill: '#4f8ef7', stroke: '#1e3a8a' }); break;
+      case 'swap-colors': store.swapSelectedFillStroke(); break;
+      case 'none-fill': store.patchSelectedStyle({ fill: null }); break;
       case 'delete': store.deleteSelected(); break;
       case 'front': store.arrangeSelected('front'); break;
       case 'back': store.arrangeSelected('back'); break;
@@ -348,6 +352,7 @@ function renderEditor() {
     menuPopover.hidden = true;
     scheduleRender();
   };
+  document.querySelectorAll('[data-panel-tab]').forEach((button) => button.addEventListener('click', () => switchPanel(button.dataset.panelTab)));
   document.querySelectorAll('[data-menu]').forEach((button) => {
     button.addEventListener('click', () => {
       const name = button.dataset.menu;
@@ -369,7 +374,7 @@ function renderEditor() {
     if (!file) return;
     try {
       const parsed = JSON.parse(await file.text());
-      store.replaceDocument(parsed);
+      store.replaceDocument(parsed.document || parsed);
     } catch (error) {
       alert(`Could not open document: ${error.message}`);
     }
