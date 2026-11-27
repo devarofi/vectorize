@@ -80,6 +80,7 @@ export class SvgRenderer {
     const vp = this.store.viewport.peek();
     const doc = this.store.doc.peek();
     const preview = this.store.dragPreview.peek();
+    const resizePreview = this.store.resizePreview.peek();
     const selected = new Set(this.store.selection.peek());
 
     // Viewport transform: single group update, never re-renders children.
@@ -106,7 +107,7 @@ export class SvgRenderer {
       g.removeAttribute('display');
       for (const shape of layer.shapes) {
         liveIds.add(shape.id);
-        this.#syncShape(g, shape, vp, selected.has(shape.id), preview);
+        this.#syncShape(g, shape, vp, selected.has(shape.id), preview, resizePreview);
       }
     }
     this.#pruneNodes(liveIds);
@@ -114,7 +115,7 @@ export class SvgRenderer {
     // Overlay (screen space). During a move preview the selection box rides
     // along with the shapes via a screen-space offset.
     const overlayOffset = preview && preview.ids.length ? { x: preview.dx, y: preview.dy } : null;
-    this.#renderOverlay(doc, vp, selected, overlayOffset);
+    this.#renderOverlay(doc, vp, selected, overlayOffset, resizePreview);
   }
 
   /* ---------------------------------------------------------------- */
@@ -168,7 +169,7 @@ export class SvgRenderer {
     }
   }
 
-  #syncShape(group, shape, vp, isSelected, preview) {
+  #syncShape(group, shape, vp, isSelected, preview, resizePreview) {
     let entry = this.nodes.get(shape.id);
     if (!entry || entry.kindTag !== shape.kind) {
       const tag = shape.kind === 'path' ? 'path' : shape.kind;
@@ -185,15 +186,24 @@ export class SvgRenderer {
     const paint = this.#paintAttrs(shape);
     const dx = preview && preview.ids.includes(shape.id) ? preview.dx / vp.scale : 0;
     const dy = preview && preview.ids.includes(shape.id) ? preview.dy / vp.scale : 0;
-    const sig = JSON.stringify([geo, paint, shape.visible, dx, dy]);
+    let liveTransform = '';
+    if (resizePreview && resizePreview.ids.includes(shape.id)) {
+      const a = resizePreview.startBox;
+      const b = resizePreview.endBox;
+      const sx = a.width === 0 ? 1 : b.width / a.width;
+      const sy = a.height === 0 ? 1 : b.height / a.height;
+      const tx = b.x - sx * a.x;
+      const ty = b.y - sy * a.y;
+      liveTransform = `translate(${fmt(tx)},${fmt(ty)}) scale(${fmt(sx, 6)},${fmt(sy, 6)})`;
+    } else if (dx || dy) {
+      liveTransform = `translate(${fmt(dx)},${fmt(dy)})`;
+    }
+    const sig = JSON.stringify([geo, paint, shape.visible, liveTransform]);
     if (sig !== entry.sig) {
       entry.sig = sig;
       for (const [k, v] of Object.entries(paint)) entry.node.setAttribute(k, v);
-      if (dx || dy) {
-        entry.node.setAttribute('transform', `translate(${fmt(dx)},${fmt(dy)})`);
-      } else {
-        entry.node.removeAttribute('transform');
-      }
+      if (liveTransform) entry.node.setAttribute('transform', liveTransform);
+      else entry.node.removeAttribute('transform');
       for (const [k, v] of Object.entries(geo)) entry.node.setAttribute(k, v);
       if (!shape.visible) entry.node.setAttribute('display', 'none');
       else entry.node.removeAttribute('display');
@@ -210,12 +220,12 @@ export class SvgRenderer {
     }
   }
 
-  #renderOverlay(doc, vp, selected, offset) {
+  #renderOverlay(doc, vp, selected, offset, resizePreview) {
     const ids = [...selected];
     const shapes = ids.map((id) => findShape(doc, id)?.shape).filter(Boolean);
 
     if (shapes.length > 0) {
-      const box = shapes.reduce((acc, s) => {
+      let box = shapes.reduce((acc, s) => {
         const b = shapeBounds(s);
         if (!acc) return { ...b };
         return {
@@ -224,6 +234,9 @@ export class SvgRenderer {
           height: Math.max(acc.y + acc.height, b.y + b.height) - Math.min(acc.y, b.y),
         };
       }, null);
+      if (resizePreview && resizePreview.ids.some((id) => selected.has(id))) {
+        box = resizePreview.endBox;
+      }
       if (box) {
         const ox = offset ? offset.x : 0;
         const oy = offset ? offset.y : 0;
