@@ -588,6 +588,10 @@ export class InteractionController {
       return;
     }
     // Tool hotkeys.
+    if (e.shiftKey && e.key.toLowerCase() === 'e') {
+      store.activeTool.value = 'eraser';
+      return;
+    }
     const hotkeys = { v: 'select', r: 'rect', o: 'ellipse', l: 'line', p: 'pen', b: 'brush', n: 'pencil', i: 'eyedropper', h: 'hand', z: 'zoom' };
     const tool = hotkeys[e.key.toLowerCase()];
     if (tool && !mod) {
