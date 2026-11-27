@@ -251,7 +251,7 @@ function renderEditor() {
 
             <section class="panel-section selection-properties" id="transparency-properties">
               <div class="section-heading"><h3>Transparency</h3></div>
-              <div class="property-row"><span>Opacity</span><input class="compact-number" type="text" value="100%" disabled /></div>
+              <div class="property-row"><span>Opacity</span><span id="opacity-summary" class="muted">100%</span></div>
               <div class="property-row"><label for="prop-blend">Blend mode</label><select id="prop-blend" class="compact-select"><option value="normal">Normal</option><option value="multiply">Multiply</option><option value="screen">Screen</option><option value="overlay">Overlay</option><option value="darken">Darken</option><option value="lighten">Lighten</option><option value="color-dodge">Color Dodge</option><option value="color-burn">Color Burn</option><option value="difference">Difference</option><option value="exclusion">Exclusion</option></select></div>
               <div class="property-row"><span>Isolate blending</span><span class="muted">Off</span></div>
             </section>
@@ -682,6 +682,8 @@ function updatePanels() {
   document.querySelector('#fill-value').textContent = fill === '__mixed__' ? 'Mixed' : (fill || 'None').toUpperCase();
   document.querySelector('#stroke-value').textContent = stroke === '__mixed__' ? 'Mixed' : (stroke || 'None').toUpperCase();
   setField('#prop-opacity', opacity === '__mixed__' ? '' : opacity == null ? 100 : numberText(opacity * 100));
+  document.querySelector('#opacity-summary').textContent = opacity === '__mixed__'
+    ? 'Mixed' : `${numberText((opacity == null ? 1 : opacity) * 100)}%`;
   setField('#prop-stroke-width', strokeWidth === '__mixed__' ? '' : strokeWidth == null ? 0 : numberText(strokeWidth));
   const setSelect = (selector, key, fallback) => {
     const value = uniform(key);
