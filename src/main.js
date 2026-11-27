@@ -58,8 +58,8 @@ function renderEditor() {
           <div class="tool-group" aria-label="Drawing and path tools">
             ${toolButton('✒', 'Pen Tool', 'P', 'pen')}
             ${toolButton('⌁', 'Curvature Tool')}
-            ${toolButton('✎', 'Pencil Tool')}
-            ${toolButton('〰', 'Smooth Tool')}
+            ${toolButton('✎', 'Pencil Tool', '', 'pencil')}
+            ${toolButton('〰', 'Smooth Tool', '', 'smooth')}
             ${toolButton('⌫', 'Path Eraser Tool')}
             ${toolButton('⊣', 'Join Tool')}
             ${toolButton('⌃', 'Anchor Point Tool')}
@@ -78,10 +78,10 @@ function renderEditor() {
           <div class="tool-divider"></div>
           <div class="tool-group" aria-label="Shape tools">
             ${toolButton('▭', 'Rectangle Tool', 'R', 'rect')}
-            ${toolButton('▢', 'Rounded Rectangle Tool')}
+            ${toolButton('▢', 'Rounded Rectangle Tool', '', 'roundRect')}
             ${toolButton('◯', 'Ellipse Tool', 'O', 'ellipse')}
-            ${toolButton('⬡', 'Polygon Tool')}
-            ${toolButton('☆', 'Star Tool')}
+            ${toolButton('⬡', 'Polygon Tool', '', 'polygon')}
+            ${toolButton('☆', 'Star Tool', '', 'star')}
             ${toolButton('／', 'Line Segment Tool', 'L', 'line')}
             ${toolButton('⌒', 'Arc Tool')}
             ${toolButton('◎', 'Spiral Tool')}
@@ -91,17 +91,17 @@ function renderEditor() {
           </div>
           <div class="tool-divider"></div>
           <div class="tool-group" aria-label="Paint and color tools">
-            ${toolButton('🖉', 'Paintbrush Tool', 'B')}
+            ${toolButton('🖉', 'Paintbrush Tool', 'B', 'brush')}
             ${toolButton('◩', 'Blob Brush Tool', 'Shift+B')}
             ${toolButton('▨', 'Mesh Tool', 'U')}
             ${toolButton('◒', 'Gradient Tool', 'G')}
-            ${toolButton('⌾', 'Eyedropper Tool', 'I')}
+            ${toolButton('⌾', 'Eyedropper Tool', 'I', 'eyedropper')}
             ${toolButton('▣', 'Live Paint Bucket Tool', 'K')}
             ${toolButton('▧', 'Live Paint Selection Tool', 'Shift+L')}
           </div>
           <div class="tool-divider"></div>
           <div class="tool-group" aria-label="Transform and edit tools">
-            ${toolButton('⌧', 'Eraser Tool', 'Shift+E')}
+            ${toolButton('⌧', 'Eraser Tool', 'Shift+E', 'eraser')}
             ${toolButton('✂', 'Scissors Tool', 'C')}
             ${toolButton('◢', 'Knife Tool')}
             ${toolButton('↔', 'Width Tool', 'Shift+W')}
@@ -143,8 +143,8 @@ function renderEditor() {
           </div>
           <div class="tool-divider"></div>
           <div class="tool-group" aria-label="Navigation tools">
-            ${toolButton('✋', 'Hand Tool')}
-            ${toolButton('⌕', 'Zoom Tool')}
+            ${toolButton('✋', 'Hand Tool', '', 'hand')}
+            ${toolButton('⌕', 'Zoom Tool', 'Z', 'zoom')}
             ${toolButton('▤', 'Slice Tool')}
             ${toolButton('▥', 'Slice Selection Tool')}
             ${toolButton('⊹', 'Measure Tool')}
@@ -548,7 +548,7 @@ function downloadFile(filename, content, type) {
   const url = URL.createObjectURL(new Blob([content], { type }));
   const anchor = document.createElement('a');
   anchor.href = url; anchor.download = filename; anchor.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 function exportSvg(doc) {
   const shapes = doc.layers.filter((layer) => layer.visible).flatMap((layer) => layer.shapes.filter((shape) => shape.visible));
