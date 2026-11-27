@@ -541,6 +541,7 @@ This is the per-button inventory for the current left toolbar. A visible button 
 - [ ] Autosave/recovery and document tabs
 - [ ] SVG import with sanitization
 - [x] SVG export (current supported primitive geometry)
+- [x] PNG export at 1× with canvas size safeguards
 - [ ] PNG export at configurable scale/background
 - [ ] PDF export
 - [ ] EPS import/export investigation
