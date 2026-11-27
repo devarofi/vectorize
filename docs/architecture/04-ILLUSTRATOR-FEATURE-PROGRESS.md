@@ -121,7 +121,7 @@ The visible toolbar is grouped into logical sections. Only the already implement
 ## 3. Right Properties panel — contextual inspector
 
 ### Panel shell
-- [x] Properties / Layers / Assets tab visuals (tabs are UI-only)
+- [x] Functional Properties / Layers / Assets tabs
 - [x] Selection summary and object-kind context label
 - [x] Document properties empty-selection state
 - [ ] Functional panel switching, collapse/expand and panel docking
@@ -190,8 +190,8 @@ The right panel combines functional selection-aware Transform and Appearance con
 
 ### Panel navigation and context
 - [x] Properties tab visual
-- [x] Layers tab visual
-- [x] Assets tab visual
+- [x] Functional Layers tab (active layer, visibility, rename, add, delete empty layer)
+- [x] Functional Assets tab (primitive presets)
 - [x] Selection summary and selected-object kind label
 - [x] Empty-selection / document-properties state
 - [ ] Functional tab switching and active-tab persistence
@@ -254,10 +254,10 @@ The right panel combines functional selection-aware Transform and Appearance con
 - [ ] Expand stroke to editable outlines
 
 ### Align and distribute properties
-- [x] Align left, horizontal center, align right visuals
-- [x] Align top, vertical center, align bottom visuals
+- [x] Align left, horizontal center, align right (functional)
+- [x] Align top, vertical center, align bottom (functional)
 - [x] Align-to selector visual
-- [x] Horizontal/vertical distribution visuals
+- [x] Equal-gap horizontal and vertical distribution
 - [ ] Align to selection
 - [ ] Align to key object
 - [ ] Align to artboard
@@ -309,8 +309,8 @@ The right panel combines functional selection-aware Transform and Appearance con
 - [ ] Gradient annotator on canvas
 
 ### Transparency properties
-- [x] Opacity field visual
-- [x] Blend mode selector visual
+- [x] Opacity editing
+- [x] Blend mode selector (Normal, Multiply, Screen, Overlay, Darken, Lighten, Dodge, Burn, Difference, Exclusion)
 - [x] Isolate blending state visual
 - [ ] Editable opacity
 - [ ] Blend modes (Normal, Multiply, Screen, Overlay, etc.)
@@ -355,8 +355,8 @@ The right panel combines functional selection-aware Transform and Appearance con
 - [ ] Graph: data, type, axes, labels, legend and styling
 
 ### Document and artboard properties
-- [x] Document width and height visuals
-- [x] Units selector visual
+- [x] Editable document width and height
+- [x] Units selector visual (pixels only)
 - [x] Artboard label visual
 - [ ] Editable document width and height
 - [ ] Units: px, pt, mm, cm, inches
