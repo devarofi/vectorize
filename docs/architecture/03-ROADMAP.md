@@ -38,8 +38,10 @@ Tasks:
 - [x] Add HTML/app bootstrap and a Jetz-driven application root.
 - [x] Add initial editor workspace layout: toolbar, canvas, basic layers/properties areas, and status bar.
 - [x] Add initial tool selection and keyboard shortcut hints.
-- [ ] Complete menu, layers panel, and properties inspector workflows.
-- [ ] Add responsive behavior for smaller viewports.
+- [~] Add Illustrator-inspired menu placeholders, expanded left tool palette, and contextual Properties panel UI; see [04-ILLUSTRATOR-FEATURE-PROGRESS.md](./04-ILLUSTRATOR-FEATURE-PROGRESS.md).
+- [ ] Implement menu, layers panel, and properties inspector workflows.
+- [~] Add initial responsive layout breakpoints for the expanded toolbar and inspector.
+- [ ] Complete responsive behavior for smaller viewports.
 - [ ] Add document title and unsaved-change indicator.
 - [ ] Add empty state and sample document.
 - [ ] Add error boundary/reporting strategy suitable for the app architecture.
