@@ -211,8 +211,8 @@ function renderEditor() {
             <section class="panel-section selection-properties" id="stroke-properties">
               <div class="section-heading"><h3>Stroke</h3><button class="panel-more" type="button" title="More stroke options" disabled>···</button></div>
               <div class="property-row"><label for="prop-stroke-width">Weight</label><input id="prop-stroke-width" class="compact-number" type="number" min="0" step="any" value="2" /></div>
-              <div class="property-row"><label for="prop-linecap">Cap</label><select id="prop-linecap" class="compact-select"><option value="butt">Butt</option><option value="round">Round</option><option value="square">Projecting</option></select></div>
-              <div class="property-row"><label for="prop-linejoin">Join</label><select id="prop-linejoin" class="compact-select"><option value="miter">Miter</option><option value="round">Round</option><option value="bevel">Bevel</option></select></div>
+              <div class="property-row"><label for="prop-linecap">Cap</label><select id="prop-linecap" class="compact-select"><option value="butt">Butt</option><option value="round">Round</option><option value="square">Projecting</option><option value="mixed" disabled>Mixed</option></select></div>
+              <div class="property-row"><label for="prop-linejoin">Join</label><select id="prop-linejoin" class="compact-select"><option value="miter">Miter</option><option value="round">Round</option><option value="bevel">Bevel</option><option value="mixed" disabled>Mixed</option></select></div>
               <div class="property-row"><label for="prop-dash">Dash</label><input id="prop-dash" class="compact-number" type="text" placeholder="e.g. 8 4" /></div>
               <div class="property-row"><span>Profile</span><span class="muted">Uniform</span></div>
             </section>
@@ -252,7 +252,7 @@ function renderEditor() {
             <section class="panel-section selection-properties" id="transparency-properties">
               <div class="section-heading"><h3>Transparency</h3></div>
               <div class="property-row"><span>Opacity</span><span id="opacity-summary" class="muted">100%</span></div>
-              <div class="property-row"><label for="prop-blend">Blend mode</label><select id="prop-blend" class="compact-select"><option value="normal">Normal</option><option value="multiply">Multiply</option><option value="screen">Screen</option><option value="overlay">Overlay</option><option value="darken">Darken</option><option value="lighten">Lighten</option><option value="color-dodge">Color Dodge</option><option value="color-burn">Color Burn</option><option value="difference">Difference</option><option value="exclusion">Exclusion</option></select></div>
+              <div class="property-row"><label for="prop-blend">Blend mode</label><select id="prop-blend" class="compact-select"><option value="normal">Normal</option><option value="multiply">Multiply</option><option value="screen">Screen</option><option value="overlay">Overlay</option><option value="darken">Darken</option><option value="lighten">Lighten</option><option value="color-dodge">Color Dodge</option><option value="color-burn">Color Burn</option><option value="difference">Difference</option><option value="exclusion">Exclusion</option><option value="mixed" disabled>Mixed</option></select></div>
               <div class="property-row"><span>Isolate blending</span><span class="muted">Off</span></div>
             </section>
 
@@ -690,7 +690,7 @@ function updatePanels() {
     const element = document.querySelector(selector);
     if (!element) return;
     element.disabled = !hasSelection;
-    if (value !== '__mixed__') element.value = value || fallback;
+    element.value = value === '__mixed__' ? 'mixed' : (value || fallback);
   };
   setSelect('#prop-linecap', 'strokeLinecap', 'butt');
   setSelect('#prop-linejoin', 'strokeLinejoin', 'miter');
