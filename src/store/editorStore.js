@@ -150,6 +150,22 @@ export function patchSelectedStyle(patch) {
   });
 }
 
+
+/** Swap fill and stroke independently for every selected shape. */
+export function swapSelectedFillStroke() {
+  const ids = selection.peek();
+  if (!ids.length) return;
+  transact('Swap fill and stroke', (draft) => {
+    for (const id of ids) {
+      const shape = findShape(draft, id)?.shape;
+      if (!shape) continue;
+      const fill = shape.style.fill;
+      shape.style.fill = shape.style.stroke;
+      shape.style.stroke = fill;
+    }
+  });
+}
+
 /** Move/resize selected shapes by setting an absolute world box (per shape). */
 export function setShapeBox(id, box) {
   transact('Transform', (draft) => {
