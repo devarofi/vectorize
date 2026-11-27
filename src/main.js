@@ -619,7 +619,7 @@ function exportSvg(doc) {
   const shapes = doc.layers.filter((layer) => layer.visible).flatMap((layer) => layer.shapes.filter((shape) => shape.visible));
   const nodes = shapes.map((shape) => {
     const s = shape.style || {};
-    const paint = `fill="${escapeHtml(s.fill || 'none')}" stroke="${escapeHtml(s.stroke || 'none')}" stroke-width="${Number(s.strokeWidth) || 0}" opacity="${Number.isFinite(s.opacity) ? s.opacity : 1}"`;
+    const paint = `fill="${escapeHtml(s.fill || 'none')}" stroke="${escapeHtml(s.stroke || 'none')}" stroke-width="${Number(s.strokeWidth) || 0}" stroke-linecap="${s.strokeLinecap || 'butt'}" stroke-linejoin="${s.strokeLinejoin || 'miter'}" stroke-dasharray="${s.strokeDasharray || 'none'}" opacity="${Number.isFinite(s.opacity) ? s.opacity : 1}" style="mix-blend-mode:${s.blendMode || 'normal'}"`;
     const g = shape.geometry;
     if (shape.kind === 'rect') return `<rect x="${g.x}" y="${g.y}" width="${g.width}" height="${g.height}" rx="${g.rx || 0}" ry="${g.ry || 0}" ${paint}/>`;
     if (shape.kind === 'ellipse') return `<ellipse cx="${g.cx}" cy="${g.cy}" rx="${g.rx}" ry="${g.ry}" ${paint}/>`;
