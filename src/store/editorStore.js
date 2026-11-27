@@ -151,6 +151,33 @@ export function patchSelectedStyle(patch) {
 }
 
 
+
+/** Distribute selected objects with equal gaps along one axis. */
+export function distributeSelected(axis = 'x') {
+  const shapes = getSelectedShapes();
+  if (shapes.length < 3) return;
+  const ids = selection.peek();
+  const sorted = shapes.map((shape) => ({ id: shape.id, box: shapeBounds(shape) }))
+    .sort((a, b) => axis === 'x' ? a.box.x - b.box.x : a.box.y - b.box.y);
+  const start = axis === 'x' ? sorted[0].box.x : sorted[0].box.y;
+  const last = sorted[sorted.length - 1].box;
+  const end = axis === 'x' ? last.x + last.width : last.y + last.height;
+  const total = sorted.reduce((sum, item) => sum + (axis === 'x' ? item.box.width : item.box.height), 0);
+  const gap = (end - start - total) / (sorted.length - 1);
+  let cursor = start;
+  transact(axis === 'x' ? 'Distribute horizontal spacing' : 'Distribute vertical spacing', (draft) => {
+    for (const item of sorted) {
+      const shape = findShape(draft, item.id)?.shape;
+      if (!shape) continue;
+      const box = shapeBounds(shape);
+      const next = { ...box };
+      if (axis === 'x') { next.x = cursor; cursor += box.width + gap; }
+      else { next.y = cursor; cursor += box.height + gap; }
+      applyBoxToShape(shape, next);
+    }
+  });
+}
+
 /** Swap fill and stroke independently for every selected shape. */
 export function swapSelectedFillStroke() {
   const ids = selection.peek();
