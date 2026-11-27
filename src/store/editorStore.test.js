@@ -102,3 +102,25 @@ test('Layer and artboard commands are history tracked', () => {
   store.deleteEmptyLayer(addedLayer);
   assert.equal(store.doc.peek().layers.length, 1);
 });
+
+test('Equal-gap distribution and fill/stroke swap are undoable', () => {
+  store.newDocument();
+  const a = createRect(0, 0, 10, 10);
+  const b = createRect(30, 0, 10, 10);
+  const c = createRect(120, 0, 10, 10);
+  store.addShape(a);
+  store.addShape(b);
+  store.addShape(c);
+  store.select([a.id, b.id, c.id]);
+
+  store.distributeSelected('x');
+  const ordered = store.getSelectedShapes().slice().sort((x, y) => x.geometry.x - y.geometry.x);
+  assert.deepEqual(ordered.map((shape) => shape.geometry.x), [0, 60, 120]);
+
+  store.patchSelectedStyle({ fill: '#ff0000', stroke: '#0000ff' });
+  store.swapSelectedFillStroke();
+  assert.equal(store.getSelectedShapes()[0].style.fill, '#0000ff');
+  assert.equal(store.getSelectedShapes()[0].style.stroke, '#ff0000');
+  store.undo();
+  assert.equal(store.getSelectedShapes()[0].style.fill, '#ff0000');
+});
