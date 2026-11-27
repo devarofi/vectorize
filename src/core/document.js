@@ -297,6 +297,15 @@ export function validateDocument(value) {
           (style.strokeDasharray != null && (typeof style.strokeDasharray !== 'string' || !/^[0-9. ]+$/.test(style.strokeDasharray)))) {
         throw new TypeError('Invalid shape appearance');
       }
+      const gradient = style.fillGradient;
+      if (gradient != null) {
+        if (!gradient || !['linear', 'radial'].includes(gradient.type) || !finite(gradient.angle) ||
+            !Array.isArray(gradient.stops) || gradient.stops.length < 2 ||
+            gradient.stops.some((stop) => !stop || !finite(stop.offset) || stop.offset < 0 || stop.offset > 1 ||
+              !validColor(stop.color) || !finite(stop.opacity ?? 1) || (stop.opacity ?? 1) < 0 || (stop.opacity ?? 1) > 1)) {
+          throw new TypeError('Invalid gradient appearance');
+        }
+      }
       const g = shape.geometry;
       const nums = shape.kind === 'rect' ? [g.x, g.y, g.width, g.height, g.rx ?? 0, g.ry ?? 0] :
         shape.kind === 'ellipse' ? [g.cx, g.cy, g.rx, g.ry] : [];
