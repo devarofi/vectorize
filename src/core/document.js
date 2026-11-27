@@ -259,6 +259,59 @@ export function setShapeFromBox(kind, box, style) {
   return kind === 'ellipse' ? createEllipse(box, style) : createRect(box.x, box.y, box.width, box.height, style);
 }
 
+
+/**
+ * Validate untrusted imported Vectorize JSON before it enters the renderer.
+ * The document model intentionally accepts only the primitive kinds it can
+ * render and hit-test correctly.
+ */
+export function validateDocument(value) {
+  const finite = (number) => Number.isFinite(number);
+  const validColor = (color) => color === null || (typeof color === 'string' && /^#[0-9a-f]{3,8}$/i.test(color));
+  if (!value || typeof value !== 'object' || !Array.isArray(value.layers) ||
+      !finite(value.width) || !finite(value.height) || value.width < 1 || value.height < 1 ||
+      value.width > 100000 || value.height > 100000) {
+    throw new TypeError('Invalid Vectorize document dimensions or layers');
+  }
+  const ids = new Set();
+  for (const layer of value.layers) {
+    if (!layer || typeof layer.id !== 'string' || typeof layer.name !== 'string' ||
+        typeof layer.visible !== 'boolean' || !Array.isArray(layer.shapes)) {
+      throw new TypeError('Invalid layer data');
+    }
+    if (ids.has(layer.id)) throw new TypeError('Duplicate document ID');
+    ids.add(layer.id);
+    for (const shape of layer.shapes) {
+      if (!shape || typeof shape.id !== 'string' || typeof shape.name !== 'string' ||
+          typeof shape.visible !== 'boolean' || !['rect', 'ellipse', 'line', 'path'].includes(shape.kind) ||
+          !shape.style || !shape.geometry) throw new TypeError('Invalid shape data');
+      if (ids.has(shape.id)) throw new TypeError('Duplicate document ID');
+      ids.add(shape.id);
+      const style = shape.style;
+      if (!validColor(style.fill) || !validColor(style.stroke) ||
+          !finite(style.strokeWidth) || style.strokeWidth < 0 ||
+          !finite(style.opacity) || style.opacity < 0 || style.opacity > 1 ||
+          !['butt', 'round', 'square'].includes(style.strokeLinecap || 'butt') ||
+          !['miter', 'round', 'bevel'].includes(style.strokeLinejoin || 'miter') ||
+          !['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'difference', 'exclusion'].includes(style.blendMode || 'normal') ||
+          (style.strokeDasharray != null && (typeof style.strokeDasharray !== 'string' || !/^[0-9. ]+$/.test(style.strokeDasharray)))) {
+        throw new TypeError('Invalid shape appearance');
+      }
+      const g = shape.geometry;
+      const nums = shape.kind === 'rect' ? [g.x, g.y, g.width, g.height, g.rx ?? 0, g.ry ?? 0] :
+        shape.kind === 'ellipse' ? [g.cx, g.cy, g.rx, g.ry] : [];
+      if (nums.some((number) => !finite(number)) || (shape.kind === 'rect' && (g.width < 0 || g.height < 0 || g.rx < 0 || g.ry < 0)) ||
+          (shape.kind === 'ellipse' && (g.rx < 0 || g.ry < 0))) throw new TypeError('Invalid shape geometry');
+      if (shape.kind === 'line' && (!Array.isArray(g.points) || g.points.length !== 2)) throw new TypeError('Invalid line points');
+      if (shape.kind === 'path' && (!Array.isArray(g.points) || g.points.length < 2 || typeof g.closed !== 'boolean')) throw new TypeError('Invalid path points');
+      if (shape.kind === 'line' || shape.kind === 'path') {
+        if (g.points.some((point) => !point || !finite(point.x) || !finite(point.y))) throw new TypeError('Invalid path coordinates');
+      }
+    }
+  }
+  return cloneDocument(value);
+}
+
 /** Deep-clone a document (structuredClone where available). */
 export function cloneDocument(doc) {
   if (typeof structuredClone === 'function') return structuredClone(doc);
