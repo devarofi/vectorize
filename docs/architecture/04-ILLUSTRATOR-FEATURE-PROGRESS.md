@@ -2,7 +2,7 @@
 
 > Scope: comprehensive UI inventory for a browser vector editor inspired by professional vector-design applications. This document tracks the intended feature surface and implementation status; it does **not** imply feature parity with Adobe Illustrator.
 >
-> Current milestone: visual tool palette and contextual Properties panel scaffold. Most controls are intentionally UI-only until their underlying document model and operations are implemented.
+> Current milestone: convert the Illustrator-inspired menu and inspector surface into a practical JavaScript/SVG editor. A visible control is only marked implemented when it performs a real operation; unsupported controls are disabled rather than presented as working.
 
 ## Status legend
 
@@ -14,10 +14,13 @@
 
 ### Menus and document controls
 - [x] Application brand and document title
-- [x] File, Edit, Object, Type, Select, Effect, View, Window, Help menu placeholders (UI-only)
-- [~] Undo / Redo
-- [~] Fit canvas
-- [ ] New, Open, Save, Save As, Revert
+- [x] File, Edit, Object, Type, Select, Effect, View, Window and Help menu surfaces
+- [x] Undo / Redo and Fit canvas commands
+- [x] New document, Open Vectorize JSON, Save Vectorize JSON, Export SVG
+- [x] Select all, Deselect, Duplicate, Delete
+- [x] Arrange to front/back and align selected objects
+- [x] View zoom in/out and fit artboard
+- [ ] Save As / Revert / autosave and recovery
 - [ ] Document tabs and multi-document workspace
 - [ ] Unsaved state derived from document history
 - [ ] Preferences and keyboard shortcut editor
@@ -47,8 +50,8 @@ The visible toolbar is grouped into logical sections. Only the already implement
 ### Drawing and path tools
 - [~] Pen tool (basic polyline path)
 - [ ] Curvature tool
-- [ ] Pencil/freehand tool
-- [ ] Smooth tool
+- [x] Pencil/freehand tool (polyline path creation)
+- [x] Smooth tool (Chaikin smoothing pass on selected polyline paths)
 - [ ] Path Eraser tool
 - [ ] Join tool
 - [ ] Anchor Point tool, Add Anchor Point, Delete Anchor Point, Convert Anchor Point
@@ -63,10 +66,10 @@ The visible toolbar is grouped into logical sections. Only the already implement
 
 ### Shape tools
 - [~] Rectangle tool
-- [ ] Rounded Rectangle tool
+- [x] Rounded Rectangle tool
 - [~] Ellipse tool
-- [ ] Polygon tool
-- [ ] Star tool
+- [x] Polygon tool (six-sided default)
+- [x] Star tool (five-point default)
 - [~] Line Segment tool
 - [ ] Arc tool
 - [ ] Spiral tool
@@ -75,16 +78,16 @@ The visible toolbar is grouped into logical sections. Only the already implement
 - [ ] Flare tool
 
 ### Paint and color tools
-- [ ] Paintbrush tool
+- [~] Paintbrush tool (freehand path with constant stroke width)
 - [ ] Blob Brush tool
 - [ ] Mesh tool
 - [ ] Gradient tool
-- [ ] Eyedropper tool
+- [x] Eyedropper tool (samples selected object's appearance)
 - [ ] Live Paint Bucket tool
 - [ ] Live Paint Selection tool
 
 ### Transform and edit tools
-- [ ] Eraser tool
+- [~] Eraser tool (click-to-delete whole object; path-segment erase deferred)
 - [ ] Scissors tool
 - [ ] Knife tool
 - [ ] Width tool
@@ -104,8 +107,8 @@ The visible toolbar is grouped into logical sections. Only the already implement
 - [ ] Slice and Slice Selection tools
 - [ ] Measure tool
 - [ ] Perspective Grid and Perspective Selection tools
-- [ ] Hand/pan tool
-- [ ] Zoom tool
+- [x] Hand/pan tool
+- [x] Zoom tool (click zoom; Shift-click zoom out)
 
 ### Toolbar utilities
 - [x] Fill/stroke swatch visual
@@ -501,8 +504,11 @@ This is the per-button inventory for the current left toolbar. A visible button 
 
 - [x] Single-layer visual preview
 - [ ] Layer tree with nesting and drag reorder
-- [ ] Create, rename, duplicate and delete layers
-- [ ] Show/hide and lock/unlock layers
+- [x] Create and rename layers
+- [x] Show/hide layers and select active drawing layer
+- [~] Delete empty layers only (non-empty layer deletion is guarded)
+- [ ] Duplicate and reorder layers
+- [ ] Lock/unlock layers
 - [ ] Object tree with thumbnails and selection sync
 - [ ] Object rename, reorder, group and ungroup
 - [ ] Isolation mode
@@ -512,10 +518,12 @@ This is the per-button inventory for the current left toolbar. A visible button 
 
 ## 5. Core vector capabilities
 
-- [~] Basic rectangle, ellipse, line and polyline path geometry
-- [~] Selection, move, resize (live object preview while dragging), delete
-- [~] Basic fill style
-- [~] Undo/redo
+- [x] Rectangle, rounded rectangle, ellipse, line, polygon, star and polyline path geometry
+- [x] Selection, move, resize (live object preview while dragging), delete
+- [x] Fill, stroke, opacity, stroke width, cap, join, dash and blend mode properties
+- [x] Multi-selection align, arrange and duplicate
+- [x] Undo/redo with snapshot-based history
+- [x] Editable artboard dimensions
 - [ ] Cubic Bézier path segments and handles
 - [ ] Direct anchor/handle editing
 - [ ] Boolean path operations
@@ -529,10 +537,10 @@ This is the per-button inventory for the current left toolbar. A visible button 
 
 ## 6. File, import/export and interoperability
 
-- [ ] Versioned native Vectorize document format
-- [ ] Open/save and autosave/recovery
+- [x] Versioned Vectorize JSON document save/open (manual download/upload)
+- [ ] Autosave/recovery and document tabs
 - [ ] SVG import with sanitization
-- [ ] SVG export
+- [x] SVG export (current supported primitive geometry)
 - [ ] PNG export at configurable scale/background
 - [ ] PDF export
 - [ ] EPS import/export investigation
@@ -570,8 +578,13 @@ This is the per-button inventory for the current left toolbar. A visible button 
 
 ## 9. Current implementation notes
 
-- UI buttons without a backing feature are intentionally inert; they must not mutate document state.
-- Existing basic tool buttons remain wired so current drawing workflows continue to work.
+- Unsupported toolbar entries are disabled and do not pretend to be functional.
+- File/Edit/Object/View menus now expose working document, selection, arrange, align and viewport commands.
+- The Layers tab supports creating, renaming, activating, hiding/showing and deleting empty layers; the Assets tab inserts reusable primitive presets.
+- The drawing tool set includes rounded rectangle, polygon, star, pencil/freehand, constant-width paintbrush, smooth, eyedropper, click-to-delete eraser, hand and zoom.
+- Native save/open uses a versioned JSON envelope; SVG export serializes currently supported primitive geometry.
+- The Properties panel supports editable stroke cap/join/dash and blend mode; document width/height are editable when no object is selected.
+- Some advanced items remain intentionally deferred because the current document model does not yet represent them (text objects, symbol instances, graph data, live-paint regions, variable-width strokes, mesh patches, and path Boolean topology).
 - Resize previews apply a live SVG transform to selected objects and update selection handles during pointer movement; pointer-up commits one history entry.
 - Fill, stroke color, opacity, stroke weight and selection bounds are now data-driven inspector controls; each edit is committed as a single undoable operation.
 - Controls are grouped by user intent, not by a promise of exact Adobe Illustrator behavior.
